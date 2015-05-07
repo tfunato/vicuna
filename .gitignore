@@ -33,3 +33,5 @@ target/
 .project
 .classpath
 .settings
+
+*.db
