@@ -1,15 +1,13 @@
 package jp.canetrash.vicuna;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * vicuna application
@@ -18,23 +16,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class Application {
+@ComponentScan
+public class Application extends SpringBootServletInitializer {
 
 	private static final Log logger = LogFactory.getLog(Application.class);
 
-	public static void main(String[] args) throws Exception {
-		ConfigurableApplicationContext ctx = SpringApplication.run(
-				Application.class, args);
-		// initialize
-		JdbcTemplate jdbcTemplate = ctx.getBean(JdbcTemplate.class);
-		DatabaseMetaData metaData = jdbcTemplate.getDataSource()
-				.getConnection().getMetaData();
-		ResultSet rs = metaData.getTables(null, null, "DAMAGE_REPORT_MAIL",
-				null);
-		if (!rs.next()) {
-			logger.info("Initializing Database....");
-			jdbcTemplate.execute(Const.INIT_TABLE);
-			logger.info("Initializing Done");
-		}
+	@Override
+	protected SpringApplicationBuilder configure(
+			SpringApplicationBuilder application) {
+		return application.sources(Application.class);
 	}
+
+	public static void main(String[] args) throws Exception {
+		logger.info("Welcome Vicuna Application!");
+		SpringApplication.run(Application.class, args);
+	}
+
 }
