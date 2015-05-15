@@ -1,13 +1,12 @@
 package jp.canetrash.vicuna.repository;
 
-import java.util.List;
-
-import jp.canetrash.vicuna.dto.DamageReportMailSearchConditionDto;
 import jp.canetrash.vicuna.entity.DamageReportMailEntity;
 
-public interface DamageReportMailRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-	List<DamageReportMailEntity> findByCondition(
-			DamageReportMailSearchConditionDto condition);
+@Repository
+public interface DamageReportMailRepository extends
+		JpaRepository<DamageReportMailEntity, String> {
 
 }

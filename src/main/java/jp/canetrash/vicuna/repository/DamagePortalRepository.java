@@ -1,11 +1,12 @@
 package jp.canetrash.vicuna.repository;
 
-import java.util.List;
-
-import jp.canetrash.vicuna.dto.DamagePortalSearchCondition;
 import jp.canetrash.vicuna.entity.DamagePortalEntity;
+import jp.canetrash.vicuna.entity.DamagePortalEntity.DamagePortalPk;
 
-public interface DamagePortalRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-	List<DamagePortalEntity> findByCondition(DamagePortalSearchCondition condition);
+@Repository
+public interface DamagePortalRepository extends
+		JpaRepository<DamagePortalEntity, DamagePortalPk> {
 }

@@ -2,7 +2,6 @@ package jp.canetrash.vicuna.web.controller;
 
 import java.util.Map;
 
-import jp.canetrash.vicuna.dto.DamageReportMailSearchConditionDto;
 import jp.canetrash.vicuna.repository.DamageReportMailRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class Index {
 
 	@RequestMapping("/")
 	public String index(Map<String, Object> model) {
-		this.damageReportMailRepository.findByCondition(new DamageReportMailSearchConditionDto());
+		this.damageReportMailRepository.findAll();
 		return "about";
 	}
 }

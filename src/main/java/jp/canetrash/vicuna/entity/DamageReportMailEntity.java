@@ -4,33 +4,36 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 /**
  * @author tfunato
  *
  */
 @Entity
+@Table(name = "DAMAGE_REPORT_MAIL")
 public class DamageReportMailEntity implements Serializable {
 
 	/** serialVersionUID */
 	private static final long serialVersionUID = 3109042741571228371L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MESSAGE_ID", nullable = false)
 	private String messageId;
 
+	@Column(name = "ATTACK_DATE")
 	private Date attackDate;
 
+	@Column(name = "OPPSITE_AGENT_NAME")
 	private String oppsiteAgentName;
 
 	private Date createDate;
 
-	@OneToMany
+	@OneToMany(mappedBy = "damageReportMailEntity")
 	private List<DamagePortalEntity> portals;
 
 	public String getMessageId() {
