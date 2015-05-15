@@ -1,26 +1,37 @@
 package jp.canetrash.vicuna.entity;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 /**
  * @author tfunato
  *
  */
-public class DamageReportMailEntity {
+@Entity
+public class DamageReportMailEntity implements Serializable {
 
+	/** serialVersionUID */
+	private static final long serialVersionUID = 3109042741571228371L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private String messageId;
 
 	private Date attackDate;
 
 	private String oppsiteAgentName;
 
-	private String portalName;
+	private Date createDate;
 
-	private String portalIntelUrl;
-
-	private Float longitude;
-
-	private Float latitude;
+	@OneToMany
+	private List<DamagePortalEntity> portals;
 
 	public String getMessageId() {
 		return messageId;
@@ -46,35 +57,20 @@ public class DamageReportMailEntity {
 		this.oppsiteAgentName = oppsiteAgentName;
 	}
 
-	public String getPortalName() {
-		return portalName;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setPortalName(String portalName) {
-		this.portalName = portalName;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 
-	public String getPortalIntelUrl() {
-		return portalIntelUrl;
+	public List<DamagePortalEntity> getPortals() {
+		return portals;
 	}
 
-	public void setPortalIntelUrl(String portalIntelUrl) {
-		this.portalIntelUrl = portalIntelUrl;
+	public void setPortals(List<DamagePortalEntity> portals) {
+		this.portals = portals;
 	}
 
-	public Float getLongitude() {
-		return longitude;
-	}
-
-	public void setLongitude(Float longitude) {
-		this.longitude = longitude;
-	}
-
-	public Float getLatitude() {
-		return latitude;
-	}
-
-	public void setLatitude(Float latitude) {
-		this.latitude = latitude;
-	}
 }
