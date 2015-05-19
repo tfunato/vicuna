@@ -4,14 +4,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.springframework.stereotype.Component;
-
 import jp.canetrash.vicuna.Const;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -35,6 +35,9 @@ public class OAuthLogic {
 			Const.STORE_BASE_DIR, "oauth2");
 
 	private GoogleAuthorizationCodeFlow flow;
+
+	@Value("${oauth.redirect.uri.base}")
+	private String redirectUriBase;
 
 	private HttpTransport httpTransport = new NetHttpTransport();
 	private JsonFactory jsonFactory = new JacksonFactory();
@@ -72,8 +75,8 @@ public class OAuthLogic {
 
 	public String getAuthPage() {
 
-		String url = flow.newAuthorizationUrl()
-				.setRedirectUri(GoogleOAuthConstants.OOB_REDIRECT_URI).build();
+		String url = flow.newAuthorizationUrl().setRedirectUri(redirectUriBase)
+				.build();
 		return url;
 	}
 
@@ -90,8 +93,7 @@ public class OAuthLogic {
 	public void storeCredential(String code) {
 		try {
 			GoogleTokenResponse response = flow.newTokenRequest(code)
-					.setRedirectUri(GoogleOAuthConstants.OOB_REDIRECT_URI)
-					.execute();
+					.setRedirectUri(redirectUriBase).execute();
 			flow.createAndStoreCredential(response, "user");
 		} catch (IOException e) {
 			throw new RuntimeException(e);

@@ -19,7 +19,7 @@ public class Index {
 
 	@RequestMapping("/")
 	public String index(Map<String, Object> model) {
-		this.damageReportMailRepository.findAll();
+		model.put("aboutMenuActive", true);
 		return "about";
 	}
 }

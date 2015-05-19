@@ -14,6 +14,7 @@ public class Dashbord {
 
 	@RequestMapping("/dashboard")
 	public String dashbord(Map<String, Object> model) {
+		model.put("dashbordMenuActive", true);
 		return "dashboard";
 	}
 }
