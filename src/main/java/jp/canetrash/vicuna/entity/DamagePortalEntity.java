@@ -17,7 +17,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "DAMAGE_REPORT")
+@Table(name = "DAMAGE_PORTAL")
 public class DamagePortalEntity implements Serializable {
 
 	/** serialVersionUID */
