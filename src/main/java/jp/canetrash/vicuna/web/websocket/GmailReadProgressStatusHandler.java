@@ -1,10 +1,10 @@
 package jp.canetrash.vicuna.web.websocket;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -17,18 +17,26 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class GmailReadProgressStatusHandler extends TextWebSocketHandler {
 
-	private Map<String, WebSocketSession> sessionPool = new ConcurrentHashMap<>();
+	protected Log logger = LogFactory
+			.getLog(GmailReadProgressStatusHandler.class);
 
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        logger.info("Opened new session in instance " + this);
+    }
+    
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session)
+	public void handleTextMessage(WebSocketSession session, TextMessage message)
 			throws Exception {
-		this.sessionPool.put(session.getId(), session);
+		String echoMessage = message.getPayload();
+		logger.info(echoMessage);
+		session.sendMessage(new TextMessage(echoMessage));
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session,
-			CloseStatus status) throws Exception {
-		this.sessionPool.remove(session.getId());
+	public void handleTransportError(WebSocketSession session,
+			Throwable exception) throws Exception {
+		session.close(CloseStatus.SERVER_ERROR);
 	}
 
 }

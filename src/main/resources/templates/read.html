@@ -5,6 +5,61 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {{> common/style}}
+<script type="text/javascript">
+        var ws = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('echo').disabled = !connected;
+        }
+
+        function connect() {
+            var target = document.getElementById('target').value;
+            ws = new SockJS("/readGmail");
+            ws.onopen = function () {
+                setConnected(true);
+                log('Info: WebSocket connection opened.');
+            };
+            ws.onmessage = function (event) {
+                log('Received: ' + event.data);
+            };
+            ws.onclose = function () {
+                setConnected(false);
+                log('Info: WebSocket connection closed.');
+            };
+        }
+
+        function disconnect() {
+            if (ws != null) {
+                ws.close();
+                ws = null;
+            }
+            setConnected(false);
+        }
+
+        function echo() {
+            if (ws != null) {
+                var message = document.getElementById('message').value;
+                log('Sent: ' + message);
+                ws.send(message);
+            } else {
+                alert('WebSocket connection not established, please connect.');
+            }
+        }
+
+        function log(message) {
+            var console = document.getElementById('console');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(message));
+            console.appendChild(p);
+            while (console.childNodes.length > 25) {
+                console.removeChild(console.firstChild);
+            }
+            console.scrollTop = console.scrollHeight;
+        }
+</script>
 
     </head>
     <body class="bootstrap-admin-with-small-navbar">
@@ -37,7 +92,24 @@
                                     <div class="text-muted bootstrap-admin-box-title">Title of the box</div>
                                 </div>
                                 <div class="bootstrap-admin-panel-content text-muted" style="padding: 60px 0; text-align: center">
-                                    Place your content here
+    <div id="connect-container">
+        <div>
+            <input id="target" type="text" size="40" style="width: 350px" value="/readGmail"/>
+        </div>
+        <div>
+            <button id="connect" onclick="connect();">Connect</button>
+            <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+        </div>
+        <div>
+            <textarea id="message" style="width: 350px">Here is a message!</textarea>
+        </div>
+        <div>
+            <button id="echo" onclick="echo();" disabled="disabled">Echo message</button>
+        </div>
+    </div>
+    <div id="console-container">
+        <div id="console"></div>
+    </div>
                                 </div>
                             </div>
                         </div>
