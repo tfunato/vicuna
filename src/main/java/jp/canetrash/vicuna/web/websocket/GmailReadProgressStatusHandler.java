@@ -1,7 +1,10 @@
 package jp.canetrash.vicuna.web.websocket;
 
+import jp.canetrash.vicuna.logic.DamageReportMailLogic;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,17 +23,30 @@ public class GmailReadProgressStatusHandler extends TextWebSocketHandler {
 	protected Log logger = LogFactory
 			.getLog(GmailReadProgressStatusHandler.class);
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-        logger.info("Opened new session in instance " + this);
-    }
-    
+	private ProcessStatus status;
+
+	@Autowired
+	private DamageReportMailLogic damageReportMailLogic;
+
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) {
+		logger.info("Opened new session in instance " + this);
+	}
+
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message)
 			throws Exception {
-		String echoMessage = message.getPayload();
-		logger.info(echoMessage);
-		session.sendMessage(new TextMessage(echoMessage));
+		String msg = message.getPayload();
+		logger.info(msg);
+		if (msg.startsWith("start")) {
+			status = new ProcessStatus();
+			damageReportMailLogic.processParseMailWithAsync(status);
+			session.sendMessage(new TextMessage("OK"));
+			logger.info("started");
+		} else if (msg.startsWith("status")) {
+			session.sendMessage(new TextMessage(Integer.toString(status.getProcessCount())));
+			logger.info("status!");
+		}
 	}
 
 	@Override
