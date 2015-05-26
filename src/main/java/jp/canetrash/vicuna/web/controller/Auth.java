@@ -20,8 +20,14 @@ public class Auth {
 	private OAuthLogic oAuthLogic;
 
 	@RequestMapping("/oauth2callback")
-	public String auth(@RequestParam("code") String code, Map<String, Object> model) {
+	public String auth(@RequestParam("code") String code,
+			Map<String, Object> model) {
 		oAuthLogic.storeCredential(code);
+		return "redirect:/authCompleate";
+	}
+
+	@RequestMapping("/authCompleate")
+	public String redirectAuth() {
 		return "read";
 	}
 }

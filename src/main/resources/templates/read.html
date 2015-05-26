@@ -51,9 +51,17 @@
                                         </div>
                                         <div>
                                             <button id="start" class="btn btn-primary">Start</button>
+                                            <button id="status" class="btn btn-primary">Status</button>
                                         </div>
                                     </div>
                                     <a href="#" class="button updatePieCharts">Update pie charts</a>
+<div id="connected" style="display:none">
+<div class="page-header">
+  <h2>Debug Room</h2>
+</div>
+<div id="messages">
+</div>
+</div>
                                 </div>
                             </div>
                         </div>
@@ -64,10 +72,24 @@
         <!-- footer -->
         {{> common/footer}}
         {{> common/script}}
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
 <script type="text/javascript">
-    var ws = null;
+    var stompClient = null; 
     $(function() {
-        ws = new SockJS("/readGmail");
+        var socket = new SockJS("/readGmail");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+            $('#connected').fadeIn();
+            stompClient.subscribe('/topic/start', function(calResult){
+            	readStart(JSON.parse(calResult.body).totalCount);
+            });
+            stompClient.subscribe('/topic/status', function(calResult){
+            	readStatus(JSON.parse(calResult.body).processCount);
+            });
+        });
+        
+        /*
         ws.onopen = function () {};
         ws.onmessage = function (event) {
         	var val = event.data;
@@ -79,6 +101,7 @@
         	}
         };
         ws.onclose = function () {};
+        */
 
         // Easy pie charts
         $('.easyPieChart').easyPieChart({
@@ -100,11 +123,14 @@
         });
         
         $('#start').on('click', function(e) {
-            ws.send("start");
-            status();
+            stompClient.send("/app/read/start", {}, {});
+        });
+        $('#status').on('click', function(e) {
+            stompClient.send("/app/read/status", {}, {});
         });
     });
     
+    /*
     var timerID;
     function status() {
         if (ws != null) {
@@ -113,6 +139,13 @@
         } else {
             alert('WebSocket connection not established, please connect.');
         }
+    }
+    */
+    function readStart(msg) {
+    	 $("#messages").html(msg);	
+    }
+    function readStatus(msg) {
+    	 $("#messages").html(msg);	
     }
 </script>
     </body>
