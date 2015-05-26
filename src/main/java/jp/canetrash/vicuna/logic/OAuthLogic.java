@@ -34,7 +34,7 @@ public class OAuthLogic {
 	private static final java.io.File DATA_STORE_DIR = new java.io.File(
 			Const.STORE_BASE_DIR, "oauth2");
 	
-	public static final String USER = "user";
+	public static final String USER = "me";
 
 	private GoogleAuthorizationCodeFlow flow;
 
