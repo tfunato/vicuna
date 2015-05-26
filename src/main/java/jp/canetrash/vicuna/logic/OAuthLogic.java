@@ -33,6 +33,8 @@ public class OAuthLogic {
 			+ "client_secret.json";
 	private static final java.io.File DATA_STORE_DIR = new java.io.File(
 			Const.STORE_BASE_DIR, "oauth2");
+	
+	public static final String USER = "user";
 
 	private GoogleAuthorizationCodeFlow flow;
 
@@ -61,7 +63,7 @@ public class OAuthLogic {
 
 	public boolean isAuthorized() {
 		try {
-			Credential credential = flow.loadCredential("user");
+			Credential credential = flow.loadCredential(USER);
 			if (credential != null
 					&& (credential.getRefreshToken() != null || credential
 							.getExpiresInSeconds() > 60)) {
@@ -82,7 +84,7 @@ public class OAuthLogic {
 
 	public Gmail getGmailService() {
 		try {
-			Credential credential = flow.loadCredential("user");
+			Credential credential = flow.loadCredential(USER);
 			return new Gmail.Builder(httpTransport, jsonFactory, credential)
 					.setApplicationName(APP_NAME).build();
 		} catch (Exception e) {
@@ -94,7 +96,7 @@ public class OAuthLogic {
 		try {
 			GoogleTokenResponse response = flow.newTokenRequest(code)
 					.setRedirectUri(redirectUriBase).execute();
-			flow.createAndStoreCredential(response, "user");
+			flow.createAndStoreCredential(response, USER);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
