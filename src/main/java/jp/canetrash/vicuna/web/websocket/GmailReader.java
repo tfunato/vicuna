@@ -32,7 +32,6 @@ public class GmailReader {
 	public ProcessStatus readStatus() {
 
 		return status;
-
 	}
 
 }
