@@ -27,7 +27,7 @@ import com.google.api.services.gmail.Gmail;
 @Component
 public class OAuthLogic {
 
-	private static final String SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
+	private static final String SCOPE = "https://www.googleapis.com/auth/gmail.modify";
 	private static final String APP_NAME = "Gmail API";
 	private static final String CLIENT_SECRET_PATH = Const.STORE_BASE_DIR
 			+ "client_secret.json";
