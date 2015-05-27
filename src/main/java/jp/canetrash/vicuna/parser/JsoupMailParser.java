@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 public class JsoupMailParser extends AbstractParser {
 
 	private static final String AGENT_NAME_CSSSELECTOR = "body > div > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > span:nth-child(2)";
-	private static final String OPS_AGENT_NAME_CSSSELECTOR = "body > div > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(5) > td > table > tbody > tr > td:nth-child(1) > div > span";
 
 	@Override
 	public DamageReportMail parse(Message msg) {
@@ -61,8 +60,7 @@ public class JsoupMailParser extends AbstractParser {
 								.parse(part.getContent().toString());
 						mail.setAgentName(doc.select(AGENT_NAME_CSSSELECTOR)
 								.html());
-						mail.setOppositeAgentName(doc.select(
-								OPS_AGENT_NAME_CSSSELECTOR).html());
+						mail.setOppositeAgentName(getOppositeAgentName(subject));
 						Elements elements = doc.getElementsByAttributeValue(
 								"style",
 								"padding-top: 1em; padding-bottom: 1em;");
@@ -105,5 +103,17 @@ public class JsoupMailParser extends AbstractParser {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String getOppositeAgentName(String subject) {
+		if (subject == null || subject.length() == 0) {
+			throw new RuntimeException("subject is null");
+		}
+		String[] split = subject
+				.split("Ingress Damage Report: Entities attacked by ");
+		if (split.length == 0) {
+			throw new RuntimeException("Invalid Subject:" + subject);
+		}
+		return split[1].trim();
 	}
 }

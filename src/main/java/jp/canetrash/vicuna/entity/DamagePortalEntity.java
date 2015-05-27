@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
@@ -26,12 +25,19 @@ public class DamagePortalEntity implements Serializable {
 	public DamagePortalEntity() {
 	}
 
-	public DamagePortalEntity(String messageId, Integer seq) {
-		this.damagePortalPk = new DamagePortalPk(messageId, seq);
+	public DamagePortalEntity(String id) {
+		this.id = id;
 	}
 
-	@EmbeddedId
-	protected DamagePortalPk damagePortalPk;
+	@Id
+	@Column(name = "ID", nullable = false)
+	private String id;
+
+	@Column(name = "MESSAGE_ID", nullable = false)
+	private String messageId;
+
+	@Column(name = "SEQ", nullable = false)
+	private Integer seq;
 
 	@Column(name = "PORTAL_NAME")
 	private String portalName;
@@ -52,38 +58,28 @@ public class DamagePortalEntity implements Serializable {
 	@JoinColumns(@JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", insertable = false, updatable = false))
 	private DamageReportMailEntity damageReportMailEntity;
 
-	@Embeddable
-	public class DamagePortalPk implements Serializable {
+	public String getId() {
+		return id;
+	}
 
-		private static final long serialVersionUID = 1L;
+	public void setId(String id) {
+		this.id = id;
+	}
 
-		public DamagePortalPk(String messageId, Integer seq) {
-			this.messageId = messageId;
-			this.seq = seq;
-		}
+	public String getMessageId() {
+		return messageId;
+	}
 
-		@Column(name = "MESSAGE_ID", nullable = false)
-		private String messageId;
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
+	}
 
-		@Column(name = "SEQ", nullable = false)
-		private Integer seq;
+	public Integer getSeq() {
+		return seq;
+	}
 
-		public String getMessageId() {
-			return messageId;
-		}
-
-		public void setMessageId(String messageId) {
-			this.messageId = messageId;
-		}
-
-		public Integer getSeq() {
-			return seq;
-		}
-
-		public void setSeq(Integer seq) {
-			this.seq = seq;
-		}
-
+	public void setSeq(Integer seq) {
+		this.seq = seq;
 	}
 
 	public String getPortalName() {
@@ -124,14 +120,6 @@ public class DamagePortalEntity implements Serializable {
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
-	}
-
-	public DamagePortalPk getDamagePortalPk() {
-		return damagePortalPk;
-	}
-
-	public void setDamagePortalPk(DamagePortalPk damagePortalPk) {
-		this.damagePortalPk = damagePortalPk;
 	}
 
 	public DamageReportMailEntity getDamageReportMailEntity() {

@@ -3,15 +3,21 @@ package jp.canetrash.vicuna.logic;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import jp.canetrash.vicuna.entity.DamagePortalEntity;
+import jp.canetrash.vicuna.entity.DamageReportMailEntity;
 import jp.canetrash.vicuna.parser.DamageReportMail;
-import jp.canetrash.vicuna.parser.JsoupMailParser;
 import jp.canetrash.vicuna.parser.MailParser;
+import jp.canetrash.vicuna.parser.Portal;
+import jp.canetrash.vicuna.repository.DamagePortalRepository;
+import jp.canetrash.vicuna.repository.DamageReportMailRepository;
 import jp.canetrash.vicuna.web.websocket.ProcessStatus;
 import jp.canetrash.vicuna.web.websocket.ProcessStatus.Status;
 
@@ -37,6 +43,12 @@ public class DamageReportMailLogic {
 	@Autowired
 	private OAuthLogic oAuthLogic;
 
+	@Autowired
+	private DamageReportMailRepository damageReportMailRepository;
+
+	@Autowired
+	private DamagePortalRepository damagePortalRepository;
+
 	protected Log logger = LogFactory.getLog(DamageReportMailLogic.class);
 
 	private static final String SEARCH_CONDITION = "subject:\"Ingress Damage Report:\" is:unread";
@@ -51,8 +63,6 @@ public class DamageReportMailLogic {
 		status.setTotalCount(0);
 		status.setProcessCount(0);
 
-		JsoupMailParser parser = new JsoupMailParser();
-
 		Gmail service = oAuthLogic.getGmailService();
 		List<String> msgIdList = new ArrayList<>();
 		try {
@@ -65,14 +75,18 @@ public class DamageReportMailLogic {
 				response = service.users().messages().list(OAuthLogic.USER)
 						.setQ(SEARCH_CONDITION)
 						.setPageToken(response.getNextPageToken()).execute();
+				if (response.isEmpty()) {
+					break;
+				}
 				for (Message msg : response.getMessages()) {
 					msgIdList.add(msg.getId());
 				}
 			}
 			status.setTotalCount(msgIdList.size());
+			logger.info("Total count:" + status.getTotalCount());
 			status.setStatus(Status.RUNNING);
 
-			int counter = 0;
+			int counter = 1;
 			for (String msgId : msgIdList) {
 				Message msg = service.users().messages()
 						.get(OAuthLogic.USER, msgId).setFormat("raw").execute();
@@ -80,8 +94,11 @@ public class DamageReportMailLogic {
 
 				MimeMessage email = new MimeMessage(null,
 						new ByteArrayInputStream(emailBytes));
-				DamageReportMail drm = parser.parse(email);
+				storeDamageMail(jsoupMailParser.parse(email));
 				status.setProcessCount(counter++);
+				if (status.getProcessCount() % 1000 == 0) {
+					logger.info("processing..." + status.getProcessCount());
+				}
 			}
 			status.setStatus(Status.STOPED);
 
@@ -92,4 +109,34 @@ public class DamageReportMailLogic {
 		return new AsyncResult<String>("result");
 	}
 
+	/**
+	 * store mail
+	 * 
+	 * @param mail
+	 */
+	private void storeDamageMail(DamageReportMail mail) {
+		if (mail == null) {
+			return;
+		}
+		DamageReportMailEntity mailEntity = new DamageReportMailEntity();
+		mailEntity.setMessageId(mail.getMessageId());
+		mailEntity.setAttackDate(mail.getDate());
+		mailEntity.setOppsiteAgentName(mail.getOppositeAgentName());
+		mailEntity.setCreateDate(new Date());
+		this.damageReportMailRepository.save(mailEntity);
+
+		int seq = 0;
+		for (Portal portal : mail.getPortals()) {
+			DamagePortalEntity portalEntity = new DamagePortalEntity(UUID
+					.randomUUID().toString());
+			portalEntity.setMessageId(mail.getMessageId());
+			portalEntity.setSeq(seq++);
+			portalEntity.setPortalName(portal.getPortalName());
+			portalEntity.setPortalIntelUrl(portal.getPortalIntelUrl());
+			portalEntity.setLongitude(Float.parseFloat(portal.getLongitude()));
+			portalEntity.setLatitude(Float.parseFloat(portal.getLatitude()));
+			portalEntity.setCreateDate(new Date());
+			this.damagePortalRepository.save(portalEntity);
+		}
+	}
 }

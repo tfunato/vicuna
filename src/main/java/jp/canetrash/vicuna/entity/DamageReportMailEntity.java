@@ -31,6 +31,7 @@ public class DamageReportMailEntity implements Serializable {
 	@Column(name = "OPPSITE_AGENT_NAME")
 	private String oppsiteAgentName;
 
+	@Column(name = "CREATE_DATE")
 	private Date createDate;
 
 	@OneToMany(mappedBy = "damageReportMailEntity")
