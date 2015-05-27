@@ -104,6 +104,7 @@ public class DamageReportMailLogic {
 
 		} catch (IOException | MessagingException e) {
 			e.printStackTrace();
+			status.setStatus(Status.ERROR);
 			throw new RuntimeException(e);
 		}
 		return new AsyncResult<String>("result");

@@ -6,7 +6,7 @@ public class ProcessStatus {
 	private Status status = Status.STOPED;
 
 	public enum Status {
-		RUNNING, PREPARING, STOPED
+		RUNNING, PREPARING, STOPED, ERROR
 	}
 
 	public int getTotalCount() {
