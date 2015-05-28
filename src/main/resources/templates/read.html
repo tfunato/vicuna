@@ -87,6 +87,9 @@
 	                $('.easyPieChart').data('easyPieChart').update(newValue);
 	                $('.percent').text(newValue);
 			        $('#totalCount').text("Total:" + json.totalCount);
+                } else if (json.status == 'ERROR') {
+                    clearTimeout(timerID);	
+		            $.jGrowl("The operation completed with ERROR!");
                 }
             });
         });
