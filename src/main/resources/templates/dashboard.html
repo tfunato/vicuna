@@ -51,9 +51,9 @@
                 </div>
             </div>
             <div class="row">
-    <div id="map-canvas" style="margin: 0px; padding: 0px"></div>
-    <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
-    <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
+                <div id="map-canvas" style="margin: 0px; padding: 0px"></div>
+                <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
+                <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
             </div>
         </div>
 
@@ -145,7 +145,6 @@
                 });
 
                 // 地図移動を検知
-                /*
                 google.maps.event.addListener(mapObj, 'idle', function(){
                     // 境界値取得
                     var bounds = mapObj.getBounds();
@@ -162,10 +161,10 @@
                         currentCenterLatLng = movedCenerLatLng;
                     }
                     var param = {
-                         ne_lat: bounds.getNorthEast().lat() + 0.0006,
-                         sw_lat: bounds.getSouthWest().lat() - 0.0006,
-                         ne_lng: bounds.getNorthEast().lng() + 0.0006,
-                         sw_lng: bounds.getSouthWest().lng() - 0.0006
+                         neLat: bounds.getNorthEast().lat() + 0.0006,
+                         swLat: bounds.getSouthWest().lat() - 0.0006,
+                         neLng: bounds.getNorthEast().lng() + 0.0006,
+                         swLng: bounds.getSouthWest().lng() - 0.0006
                     };
                     // マーカークリア
                     marker_list.forEach(function(marker, idx) {
@@ -174,42 +173,47 @@
                     //var marker_points = new google.maps.MVCArray();
 
                     // ポータル問い合わせ
-                    $.post('/psapi/v1', param, function(response){
-                        // ヒートマップポイントクリア
-                       // marker_points.clear();
-                        // process response
-                        var portals = JSON.parse(response);
-                        for (var i= 0; i < portals.length; i++) {
-                          var portal = portals[i];
-                          var  marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(portal.lat, portal.lng),
-                            map: mapObj,
-                            title: portal.title,
-                            icon: new google.maps.MarkerImage(
-                                  "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral_icon.png",
-                                  new google.maps.Size(60,60), // size
-                                  new google.maps.Point(0,0),  // origin
-                                  new google.maps.Point(30,30) // anchor
-                                )
-                          });
-                          marker_list.push(marker);
-                          //marker_points.push(new google.maps.LatLng(portal.lat, portal.lng));
+                    $.ajax({
+                    	type:"POST", 
+                    	url:'/portals', 
+                    	data:param }, 
+                        success: function(response){
+                            // ヒートマップポイントクリア
+                            // marker_points.clear();
+                            // process response
+                            var portals = JSON.parse(response);
+                            for (var i= 0; i < portals.length; i++) {
+                              var portal = portals[i];
+                              var  marker = new google.maps.Marker({
+                                position: new google.maps.LatLng(portal.lat, portal.lng),
+                                map: mapObj,
+                                title: portal.title,
+                                icon: new google.maps.MarkerImage(
+                                      "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral_icon.png",
+                                      new google.maps.Size(60,60), // size
+                                      new google.maps.Point(0,0),  // origin
+                                      new google.maps.Point(30,30) // anchor
+                                    )
+                              });
+                              marker_list.push(marker);
+                              //marker_points.push(new google.maps.LatLng(portal.lat, portal.lng));
 
-                          var infoContents = '<div class="infowindow">' +
-                               '<a href="' + portal.intel + '" target="_blank">' +
-                               portal.title + '</a><br/><img src="' + portal.image +'" width="40%"></div>' + portal.address;
-                          markerClick(marker, infoContents);
-                        }
+                              var infoContents = '<div class="infowindow">' +
+                                   '<a href="' + portal.intel + '" target="_blank">' +
+                                   portal.title + '</a><br/><img src="' + portal.image +'" width="40%"></div>' + portal.address;
+                              markerClick(marker, infoContents);
+                            }
                       });
                       // ヒートマップ
+                      /*
                       var heatmap = new google.maps.visualization.HeatmapLayer({
                           radius:40,
                           opacity:0.3,
                           data: marker_points
                       });
                       heatmap.setMap(mapObj);
+                      */
                   });
-            */
               }
               // 現在地へ移動
               function moveToCurrent() {
