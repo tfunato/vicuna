@@ -73,11 +73,13 @@ public class DamageReportMailLogic {
 		try {
 			ListMessagesResponse response = messages.list(OAuthLogic.USER)
 					.setQ(SEARCH_CONDITION).execute();
-			if (response.getResultSizeEstimate() == 0 || response.size() == 1) { // api bug?
+			if (response.getResultSizeEstimate() == 0 || response.size() == 1) { // api
+																					// bug?
 				logger.info("no mail for processing");
 				status.setStatus(Status.STOPED);
 				return new AsyncResult<String>("result");
 			}
+			logger.info("read mail ids...");
 			List<Message> messageList = response.getMessages();
 			for (Message msg : messageList) {
 				msgIdList.add(msg.getId());
@@ -92,6 +94,9 @@ public class DamageReportMailLogic {
 				}
 				for (Message msg : response.getMessages()) {
 					msgIdList.add(msg.getId());
+					if (msgIdList.size() % 1000 == 0) {
+						logger.info("reading ids:" + msgIdList.size());
+					}
 				}
 			}
 			status.setTotalCount(msgIdList.size());
