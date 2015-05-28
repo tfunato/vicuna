@@ -1,6 +1,7 @@
 package jp.canetrash.vicuna.web.websocket;
 
 import jp.canetrash.vicuna.logic.DamageReportMailLogic;
+import jp.canetrash.vicuna.web.websocket.ProcessStatus.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,8 +23,11 @@ public class GmailReader {
 	@MessageMapping("/read/start")
 	@SendTo("/topic/start")
 	public ProcessStatus readStart() {
-		logger.info("start read gmail");
-		damageReportMailLogic.processParseMailWithAsync(status);
+		if (status.getStatus() == Status.STOPED) {
+			damageReportMailLogic.processParseMailWithAsync(status);
+		} else {
+			logger.info("can't start.:" + status.getStatus());
+		}
 		return status;
 	}
 

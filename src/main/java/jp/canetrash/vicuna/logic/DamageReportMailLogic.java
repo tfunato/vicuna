@@ -3,6 +3,7 @@ package jp.canetrash.vicuna.logic;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,9 +30,10 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.Gmail.Users.Messages;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.ModifyMessageRequest;
 
 /**
  * @author tfunato
@@ -59,23 +61,33 @@ public class DamageReportMailLogic {
 	@Async
 	public Future<String> processParseMailWithAsync(ProcessStatus status) {
 
-		status.setStatus(Status.PREPARING);
+		logger.info("START read gmail");
+
+		status.setStatus(Status.PREPARING); // mark prepare
 		status.setTotalCount(0);
 		status.setProcessCount(0);
 
-		Gmail service = oAuthLogic.getGmailService();
+		Messages messages = oAuthLogic.getGmailService().users().messages();
+
 		List<String> msgIdList = new ArrayList<>();
 		try {
-			ListMessagesResponse response = service.users().messages()
-					.list(OAuthLogic.USER).setQ(SEARCH_CONDITION).execute();
-			for (Message msg : response.getMessages()) {
+			ListMessagesResponse response = messages.list(OAuthLogic.USER)
+					.setQ(SEARCH_CONDITION).execute();
+			if (response.getResultSizeEstimate() == 0 || response.size() == 1) { // api bug?
+				logger.info("no mail for processing");
+				status.setStatus(Status.STOPED);
+				return new AsyncResult<String>("result");
+			}
+			List<Message> messageList = response.getMessages();
+			for (Message msg : messageList) {
 				msgIdList.add(msg.getId());
 			}
 			while (response.getNextPageToken() != null) {
-				response = service.users().messages().list(OAuthLogic.USER)
+				response = messages.list(OAuthLogic.USER)
 						.setQ(SEARCH_CONDITION)
 						.setPageToken(response.getNextPageToken()).execute();
-				if (response.isEmpty()) {
+				if (response.getResultSizeEstimate() == 0
+						|| response.size() == 1) { // api bug?
 					break;
 				}
 				for (Message msg : response.getMessages()) {
@@ -84,27 +96,37 @@ public class DamageReportMailLogic {
 			}
 			status.setTotalCount(msgIdList.size());
 			logger.info("Total count:" + status.getTotalCount());
-			status.setStatus(Status.RUNNING);
+			status.setStatus(Status.RUNNING); // mark running
 
-			int counter = 1;
+			List<String> removeLabels = Arrays
+					.asList(new String[] { "UNREAD" });
 			for (String msgId : msgIdList) {
-				Message msg = service.users().messages()
-						.get(OAuthLogic.USER, msgId).setFormat("raw").execute();
+				Message msg = messages.get(OAuthLogic.USER, msgId)
+						.setFormat("raw").execute();
 				byte[] emailBytes = Base64.decodeBase64(msg.getRaw());
 
 				MimeMessage email = new MimeMessage(null,
 						new ByteArrayInputStream(emailBytes));
+				// store to database
 				storeDamageMail(jsoupMailParser.parse(email));
-				status.setProcessCount(counter++);
+
+				// marks as 'read' at this mail
+				messages.modify(
+						OAuthLogic.USER,
+						msgId,
+						new ModifyMessageRequest()
+								.setRemoveLabelIds(removeLabels)).execute();
+				status.incrementCounter();
 				if (status.getProcessCount() % 1000 == 0) {
 					logger.info("processing..." + status.getProcessCount());
 				}
 			}
-			status.setStatus(Status.STOPED);
+			status.setStatus(Status.STOPED); // mark stoped
+			logger.info("END read gmail");
 
 		} catch (IOException | MessagingException e) {
 			e.printStackTrace();
-			status.setStatus(Status.ERROR);
+			status.setStatus(Status.ERROR); // mark error
 			throw new RuntimeException(e);
 		}
 		return new AsyncResult<String>("result");
@@ -117,6 +139,10 @@ public class DamageReportMailLogic {
 	 */
 	private void storeDamageMail(DamageReportMail mail) {
 		if (mail == null) {
+			return;
+		}
+		// exist check
+		if (damagePortalRepository.exists(mail.getMessageId())) {
 			return;
 		}
 		DamageReportMailEntity mailEntity = new DamageReportMailEntity();

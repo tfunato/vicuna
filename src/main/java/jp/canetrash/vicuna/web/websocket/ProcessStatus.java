@@ -1,8 +1,8 @@
 package jp.canetrash.vicuna.web.websocket;
 
 public class ProcessStatus {
-	private int totalCount;
-	private int processCount;
+	private int totalCount = 0;
+	private int processCount = 0;
 	private Status status = Status.STOPED;
 
 	public enum Status {
@@ -31,5 +31,9 @@ public class ProcessStatus {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+	
+	public synchronized void incrementCounter() {
+		processCount++;
 	}
 }
