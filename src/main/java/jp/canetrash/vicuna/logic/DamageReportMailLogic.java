@@ -120,7 +120,7 @@ public class DamageReportMailLogic {
 
 		for (int i = 0; i < size; i++) {
 			int start = i * block;
-			int end = Math.min(start + block, msgIdList.size());
+			int end = Math.max(start + block, msgIdList.size());
 			devidedList
 					.add(new ArrayList<String>(msgIdList.subList(start, end)));
 		}
