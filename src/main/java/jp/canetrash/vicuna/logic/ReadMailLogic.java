@@ -81,7 +81,8 @@ public class ReadMailLogic {
 				}
 			}
 			logger.info("processing done.");
-			return new AsyncResult<String>("result");
+			return new AsyncResult<String>(Thread.currentThread().getName()
+					+ ":" + msgIdList.size());
 		} finally {
 			latch.countDown();
 		}

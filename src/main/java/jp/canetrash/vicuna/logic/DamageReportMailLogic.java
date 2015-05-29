@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.mail.MessagingException;
@@ -87,15 +88,20 @@ public class DamageReportMailLogic {
 
 			List<List<String>> splitIdList = splitIdList(msgIdList);
 			final CountDownLatch latch = new CountDownLatch(splitIdList.size());
+			List<Future<String>> results = new ArrayList<>();
 			for (List<String> ids : splitIdList) {
-				readMailLogic.parallelReadMailWithAsync(latch, messages, ids,
-						status);
+				results.add(readMailLogic.parallelReadMailWithAsync(latch, messages, ids,
+						status));
 			}
 			latch.await();
+			for (Future<String> res : results) {
+				logger.info(res.get());
+			}
 			status.setStatus(Status.STOPED); // mark stoped
 			logger.info("END read gmail");
 
-		} catch (IOException | MessagingException | InterruptedException e) {
+		} catch (IOException | MessagingException | InterruptedException
+				| ExecutionException e) {
 			e.printStackTrace();
 			status.setStatus(Status.ERROR); // mark error
 			throw new RuntimeException(e);
