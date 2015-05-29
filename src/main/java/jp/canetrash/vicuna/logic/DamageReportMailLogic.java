@@ -105,7 +105,7 @@ public class DamageReportMailLogic {
 
 	private List<List<String>> splitIdList(List<String> msgIdList) {
 
-		int size = 10; // threads
+		int size = 5; // threads
 		if (msgIdList == null || msgIdList.isEmpty()) {
 			return Collections.emptyList();
 		}
