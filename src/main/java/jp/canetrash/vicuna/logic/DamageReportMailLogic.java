@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.mail.MessagingException;
 
-import jp.canetrash.vicuna.repository.DamagePortalRepository;
-import jp.canetrash.vicuna.repository.DamageReportMailRepository;
 import jp.canetrash.vicuna.web.websocket.ProcessStatus;
 import jp.canetrash.vicuna.web.websocket.ProcessStatus.Status;
 
@@ -35,12 +32,6 @@ public class DamageReportMailLogic {
 
 	@Autowired
 	private OAuthLogic oAuthLogic;
-
-	@Autowired
-	private DamageReportMailRepository damageReportMailRepository;
-
-	@Autowired
-	private DamagePortalRepository damagePortalRepository;
 
 	@Autowired
 	private ReadMailLogic readMailLogic;
@@ -96,20 +87,15 @@ public class DamageReportMailLogic {
 
 			List<List<String>> splitIdList = splitIdList(msgIdList);
 			final CountDownLatch latch = new CountDownLatch(splitIdList.size());
-			List<Future<String>> results = new ArrayList<>();
 			for (List<String> ids : splitIdList) {
-				results.add(readMailLogic.parallelReadMailWithAsync(latch,
-						messages, ids, status));
+				readMailLogic.parallelReadMailWithAsync(latch, messages, ids,
+						status);
 			}
 			latch.await();
-			for (Future<String> res : results) {
-				logger.info("thread result." + res.get());
-			}
 			status.setStatus(Status.STOPED); // mark stoped
 			logger.info("END read gmail");
 
-		} catch (IOException | MessagingException | InterruptedException
-				| ExecutionException e) {
+		} catch (IOException | MessagingException | InterruptedException e) {
 			e.printStackTrace();
 			status.setStatus(Status.ERROR); // mark error
 			throw new RuntimeException(e);
@@ -119,22 +105,25 @@ public class DamageReportMailLogic {
 
 	private List<List<String>> splitIdList(List<String> msgIdList) {
 
-		int size = 2000; // devide by 2000
+		int size = 10; // threads
 		if (msgIdList == null || msgIdList.isEmpty()) {
 			return Collections.emptyList();
 		}
+		List<List<String>> devidedList = new ArrayList<List<String>>();
 
-		int block = msgIdList.size() / size
-				+ (msgIdList.size() % size > 0 ? 1 : 0);
+		if (msgIdList.size() <= size) {
+			devidedList.add(msgIdList);
+			return devidedList;
+		}
 
-		List<List<String>> devidedList = new ArrayList<List<String>>(block);
-		for (int i = 0; i < block; i++) {
-			int start = i * size;
-			int end = Math.min(start + size, msgIdList.size());
+		int block = msgIdList.size() / size;
+
+		for (int i = 0; i < size; i++) {
+			int start = i * block;
+			int end = Math.min(start + block, msgIdList.size());
 			devidedList
 					.add(new ArrayList<String>(msgIdList.subList(start, end)));
 		}
 		return devidedList;
 	}
-
 }

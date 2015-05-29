@@ -65,7 +65,8 @@ public class ReadMailLogic {
 
 				MimeMessage email = new MimeMessage(null,
 						new ByteArrayInputStream(emailBytes));
-				// store to database
+
+				// store database
 				storeDamageMail(jsoupMailParser.parse(email));
 
 				// marks as 'read' at this mail
@@ -80,7 +81,7 @@ public class ReadMailLogic {
 				}
 			}
 			logger.info("processing done.");
-			return new AsyncResult<String>(msgIdList.size() + " done.");
+			return new AsyncResult<String>("result");
 		} finally {
 			latch.countDown();
 		}
@@ -91,7 +92,7 @@ public class ReadMailLogic {
 	 * 
 	 * @param mail
 	 */
-	private void storeDamageMail(DamageReportMail mail) {
+	private synchronized void storeDamageMail(DamageReportMail mail) {
 		if (mail == null) {
 			return;
 		}
