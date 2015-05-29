@@ -116,11 +116,11 @@ public class DamageReportMailLogic {
 			return devidedList;
 		}
 
-		int block = msgIdList.size() / size;
+		int block = msgIdList.size() / size + msgIdList.size() % size;
 
 		for (int i = 0; i < size; i++) {
 			int start = i * block;
-			int end = Math.max(start + block, msgIdList.size());
+			int end = Math.min(start + block, msgIdList.size());
 			devidedList
 					.add(new ArrayList<String>(msgIdList.subList(start, end)));
 		}
