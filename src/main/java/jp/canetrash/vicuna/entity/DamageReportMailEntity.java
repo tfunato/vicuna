@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -34,7 +35,7 @@ public class DamageReportMailEntity implements Serializable {
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
 
-	@OneToMany(mappedBy = "damageReportMailEntity")
+	@OneToMany(mappedBy = "damageReportMailEntity", fetch = FetchType.LAZY)
 	private List<DamagePortalEntity> portals;
 
 	public String getMessageId() {

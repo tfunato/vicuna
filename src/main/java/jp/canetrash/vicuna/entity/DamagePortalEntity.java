@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
@@ -54,7 +55,7 @@ public class DamagePortalEntity implements Serializable {
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumns(@JoinColumn(name = "MESSAGE_ID", referencedColumnName = "MESSAGE_ID", insertable = false, updatable = false))
 	private DamageReportMailEntity damageReportMailEntity;
 

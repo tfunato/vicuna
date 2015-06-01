@@ -43,17 +43,16 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="page-header">
-                                <h1>Page title</h1>
+                                <h1>Visited Portals</h1>
                             </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
             <div class="row">
                 <div id="map-canvas" style="margin: 0px; padding: 0px"></div>
                 <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
                 <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
+            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -85,7 +84,7 @@
             // Map初期化
             function initialize(lat, lng, tolerance) {
                 var map = document.getElementById("map-canvas");
-            	map.style.width = window.innerWidth + "px";
+            	map.style.width = (window.innerWidth - 150) + "px";
             	map.style.height = window.innerHeight + "px";
 
                 var currentPos = new google.maps.LatLng(lat, lng);
@@ -96,7 +95,7 @@
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
                 mapObj = new google.maps.Map(map, options);
-                //currentCenterLatLng = mapObj.getCenter();
+                currentCenterLatLng = mapObj.getCenter();
                 var marker = new google.maps.Marker({
                     position: currentPos,
                     map: mapObj
@@ -176,12 +175,12 @@
                     $.ajax({
                     	type:"POST", 
                     	url:'/portals', 
-                    	data:param }, 
-                        success: function(response){
+                    	data:param, 
+                        success: function(response) {
                             // ヒートマップポイントクリア
                             // marker_points.clear();
                             // process response
-                            var portals = JSON.parse(response);
+                            var portals = response;
                             for (var i= 0; i < portals.length; i++) {
                               var portal = portals[i];
                               var  marker = new google.maps.Marker({
@@ -200,9 +199,10 @@
 
                               var infoContents = '<div class="infowindow">' +
                                    '<a href="' + portal.intel + '" target="_blank">' +
-                                   portal.title + '</a><br/><img src="' + portal.image +'" width="40%"></div>' + portal.address;
+                                   portal.title + '</a></div>';
                               markerClick(marker, infoContents);
                             }
+                        }
                       });
                       // ヒートマップ
                       /*
