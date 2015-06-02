@@ -3,10 +3,10 @@ package jp.canetrash.vicuna.logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.canetrash.vicuna.dao.DamagePortalDao;
 import jp.canetrash.vicuna.dto.PortalDto;
 import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
 import jp.canetrash.vicuna.entity.DamagePortalEntity;
-import jp.canetrash.vicuna.repository.DamagePortalRepository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +19,7 @@ public class PortalLogic {
 	private static Log logger = LogFactory.getLog(PortalLogic.class);
 
 	@Autowired
-	private DamagePortalRepository damagePortalRepository;
+	private DamagePortalDao damagePortalDao;
 
 	/**
 	 * @param condition
@@ -31,9 +31,8 @@ public class PortalLogic {
 		logger.info("neLng:" + condition.getNeLng());
 		logger.info("swLng:" + condition.getSwLng());
 		logger.info("query start...");
-		List<DamagePortalEntity> searchResult = damagePortalRepository
-				.findByGeoParameter(condition.getNeLat(), condition.getSwLat(),
-						condition.getNeLng(), condition.getSwLng());
+		List<DamagePortalEntity> searchResult = damagePortalDao
+				.findByGeoRange(condition);
 		logger.info("query end...");
 		logger.info("mapping start...");
 		List<PortalDto> result = new ArrayList<>();

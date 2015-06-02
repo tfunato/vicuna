@@ -12,13 +12,13 @@ import java.util.concurrent.Future;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import jp.canetrash.vicuna.dao.DamagePortalDao;
+import jp.canetrash.vicuna.dao.DamageReportMailDao;
 import jp.canetrash.vicuna.entity.DamagePortalEntity;
 import jp.canetrash.vicuna.entity.DamageReportMailEntity;
 import jp.canetrash.vicuna.parser.DamageReportMail;
 import jp.canetrash.vicuna.parser.MailParser;
 import jp.canetrash.vicuna.parser.Portal;
-import jp.canetrash.vicuna.repository.DamagePortalRepository;
-import jp.canetrash.vicuna.repository.DamageReportMailRepository;
 import jp.canetrash.vicuna.web.websocket.ProcessStatus;
 
 import org.apache.commons.logging.Log;
@@ -39,10 +39,10 @@ public class ReadMailLogic {
 	protected Log logger = LogFactory.getLog(ReadMailLogic.class);
 
 	@Autowired
-	private DamageReportMailRepository damageReportMailRepository;
+	private DamageReportMailDao damageReportMailDao;
 
 	@Autowired
-	private DamagePortalRepository damagePortalRepository;
+	private DamagePortalDao damagePortalDao;
 
 	@Autowired
 	private MailParser jsoupMailParser;
@@ -98,15 +98,16 @@ public class ReadMailLogic {
 			return;
 		}
 		// exist check
-		if (damagePortalRepository.exists(mail.getMessageId())) {
+		if (this.damageReportMailDao.exists(mail.getMessageId())) {
 			return;
 		}
+
 		DamageReportMailEntity mailEntity = new DamageReportMailEntity();
 		mailEntity.setMessageId(mail.getMessageId());
 		mailEntity.setAttackDate(mail.getDate());
 		mailEntity.setOppsiteAgentName(mail.getOppositeAgentName());
 		mailEntity.setCreateDate(new Date());
-		this.damageReportMailRepository.save(mailEntity);
+		this.damageReportMailDao.save(mailEntity);
 
 		int seq = 0;
 		for (Portal portal : mail.getPortals()) {
@@ -119,7 +120,7 @@ public class ReadMailLogic {
 			portalEntity.setLongitude(Float.parseFloat(portal.getLongitude()));
 			portalEntity.setLatitude(Float.parseFloat(portal.getLatitude()));
 			portalEntity.setCreateDate(new Date());
-			this.damagePortalRepository.save(portalEntity);
+			this.damagePortalDao.save(portalEntity);
 		}
 	}
 }
