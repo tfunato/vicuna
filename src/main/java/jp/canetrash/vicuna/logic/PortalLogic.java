@@ -30,9 +30,12 @@ public class PortalLogic {
 		logger.info("swLat:" + condition.getSwLat());
 		logger.info("neLng:" + condition.getNeLng());
 		logger.info("swLng:" + condition.getSwLng());
+		logger.info("query start...");
 		List<DamagePortalEntity> searchResult = damagePortalRepository
 				.findByGeoParameter(condition.getNeLat(), condition.getSwLat(),
 						condition.getNeLng(), condition.getSwLng());
+		logger.info("query end...");
+		logger.info("mapping start...");
 		List<PortalDto> result = new ArrayList<>();
 		for (DamagePortalEntity entity : searchResult) {
 			PortalDto portal = new PortalDto();
@@ -42,6 +45,7 @@ public class PortalLogic {
 			portal.setLng(entity.getLongitude());
 			result.add(portal);
 		}
+		logger.info("mapping end...");
 		return result;
 	}
 }
