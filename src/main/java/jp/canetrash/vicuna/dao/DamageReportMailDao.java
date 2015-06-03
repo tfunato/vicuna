@@ -36,7 +36,7 @@ public class DamageReportMailDao {
 		mailEntity.setCreateDate(new Date());
 
 		String sql = "insert into damage_report_mail (gmail_id, message_id, opposite_agent_name, attack_date, create_date) "
-				+ " values(:gmailId, :messageId, :attackDate, :oppositeAgentName, :createDate)";
+				+ " values(:gmailId, :messageId, :oppositeAgentName, :attackDate, :createDate)";
 		this.namedParameterJdbcTemplate.update(sql,
 				new BeanPropertySqlParameterSource(mailEntity));
 	}
