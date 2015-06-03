@@ -44,7 +44,7 @@ public class DamagePortalDao {
 				+ " from damage_portal p where p.latitude <= :neLat"
 				+ " and p.latitude >= :swLat and p.longitude <= :neLng"
 				+ " and p.longitude >= :swLng group by p.latitude, p.longitude"
-				+ " having max(p.create_date) limit 1000";
+				+ " having max(p.create_date) limit 2000";
 
 		List<DamagePortalEntity> result = namedParameterJdbcTemplate.query(sql,
 				new BeanPropertySqlParameterSource(condition),
