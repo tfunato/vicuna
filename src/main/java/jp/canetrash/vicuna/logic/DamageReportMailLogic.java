@@ -117,7 +117,7 @@ public class DamageReportMailLogic {
 		}
 		List<List<String>> devidedList = new ArrayList<List<String>>();
 
-		if (msgIdList.size() <= size) {
+		if (msgIdList.size() <= 200) {
 			devidedList.add(msgIdList);
 			return devidedList;
 		}
