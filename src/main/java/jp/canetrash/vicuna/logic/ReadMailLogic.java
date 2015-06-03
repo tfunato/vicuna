@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -27,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.google.api.services.gmail.Gmail.Users.Messages;
@@ -59,15 +59,18 @@ public class ReadMailLogic {
 		try {
 			for (String msgId : msgIdList) {
 				cnt++;
-				Message msg = messages.get(OAuthLogic.USER, msgId)
-						.setFormat("raw").execute();
-				byte[] emailBytes = Base64.decodeBase64(msg.getRaw());
+				if (!isStored(msgId)) {
 
-				MimeMessage email = new MimeMessage(null,
-						new ByteArrayInputStream(emailBytes));
+					Message msg = messages.get(OAuthLogic.USER, msgId)
+							.setFormat("raw").execute();
+					byte[] emailBytes = Base64.decodeBase64(msg.getRaw());
 
-				// store database
-				storeDamageMail(jsoupMailParser.parse(email));
+					MimeMessage email = new MimeMessage(null,
+							new ByteArrayInputStream(emailBytes));
+
+					// store database
+					storeDamageMail(msgId, jsoupMailParser.parse(email));
+				}
 
 				// marks as 'read' at this mail
 				messages.modify(
@@ -75,6 +78,7 @@ public class ReadMailLogic {
 						msgId,
 						new ModifyMessageRequest()
 								.setRemoveLabelIds(removeLabels)).execute();
+
 				status.incrementCounter();
 				if (cnt % 200 == 0) {
 					logger.info(cnt + " done.");
@@ -88,31 +92,33 @@ public class ReadMailLogic {
 		}
 	}
 
+	private synchronized boolean isStored(String msgId) {
+		// exist check
+		return this.damageReportMailDao.exists(msgId);
+	}
+
 	/**
 	 * store mail
 	 * 
 	 * @param mail
 	 */
-	private synchronized void storeDamageMail(DamageReportMail mail) {
-		if (mail == null) {
-			return;
-		}
-		// exist check
-		if (this.damageReportMailDao.exists(mail.getMessageId())) {
-			return;
-		}
+	private synchronized void storeDamageMail(String msgId,
+			DamageReportMail mail) {
+
+		Assert.notNull(msgId);
+		Assert.notNull(mail);
 
 		DamageReportMailEntity mailEntity = new DamageReportMailEntity();
+		mailEntity.setGmailId(msgId);
 		mailEntity.setMessageId(mail.getMessageId());
 		mailEntity.setAttackDate(mail.getDate());
-		mailEntity.setOppsiteAgentName(mail.getOppositeAgentName());
+		mailEntity.setOppositeAgentName(mail.getOppositeAgentName());
 		mailEntity.setCreateDate(new Date());
 		this.damageReportMailDao.save(mailEntity);
 
 		int seq = 0;
 		for (Portal portal : mail.getPortals()) {
-			DamagePortalEntity portalEntity = new DamagePortalEntity(UUID
-					.randomUUID().toString());
+			DamagePortalEntity portalEntity = new DamagePortalEntity();
 			portalEntity.setMessageId(mail.getMessageId());
 			portalEntity.setSeq(seq++);
 			portalEntity.setPortalName(portal.getPortalName());

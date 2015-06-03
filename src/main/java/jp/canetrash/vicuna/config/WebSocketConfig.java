@@ -1,4 +1,4 @@
-package jp.canetrash.vicuna.web.config;
+package jp.canetrash.vicuna.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -21,14 +21,4 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/readGmail").withSockJS();
 	}
 
-	/*
-	 * @Autowired private GmailReadProgressStatusHandler
-	 * gmailReadProgressStatusHandler;
-	 * 
-	 * @Override public void registerWebSocketHandlers(WebSocketHandlerRegistry
-	 * registry) {
-	 * 
-	 * registry.addHandler(gmailReadProgressStatusHandler,
-	 * "/readGmail").withSockJS(); }
-	 */
 }

@@ -12,13 +12,23 @@ public class DamageReportMailEntity implements Serializable {
 	/** serialVersionUID */
 	private static final long serialVersionUID = 3109042741571228371L;
 
+	private String gmailId;
+
 	private String messageId;
 
 	private Date attackDate;
 
-	private String oppsiteAgentName;
+	private String oppositeAgentName;
 
 	private Date createDate;
+
+	public void setGmailId(String gmailId) {
+		this.gmailId = gmailId;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 
 	public String getMessageId() {
 		return messageId;
@@ -36,12 +46,12 @@ public class DamageReportMailEntity implements Serializable {
 		this.attackDate = attackDate;
 	}
 
-	public String getOppsiteAgentName() {
-		return oppsiteAgentName;
+	public String getOppositeAgentName() {
+		return oppositeAgentName;
 	}
 
-	public void setOppsiteAgentName(String oppsiteAgentName) {
-		this.oppsiteAgentName = oppsiteAgentName;
+	public void setOppositeAgentName(String oppositeAgentName) {
+		this.oppositeAgentName = oppositeAgentName;
 	}
 
 	public Date getCreateDate() {
@@ -50,6 +60,10 @@ public class DamageReportMailEntity implements Serializable {
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public String getGmailId() {
+		return gmailId;
 	}
 
 }

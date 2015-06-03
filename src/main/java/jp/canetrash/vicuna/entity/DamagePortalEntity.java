@@ -15,12 +15,6 @@ public class DamagePortalEntity implements Serializable {
 	public DamagePortalEntity() {
 	}
 
-	public DamagePortalEntity(String id) {
-		this.id = id;
-	}
-
-	private String id;
-
 	private String messageId;
 
 	private Integer seq;
@@ -34,14 +28,6 @@ public class DamagePortalEntity implements Serializable {
 	private Float latitude;
 
 	private Date createDate;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getMessageId() {
 		return messageId;
