@@ -55,7 +55,7 @@ public class DamageReportMailLogic {
 		List<String> msgIdList = new ArrayList<>();
 		try {
 			ListMessagesResponse response = messages.list(OAuthLogic.USER)
-					.setQ(SEARCH_CONDITION).execute();
+					.setQ(SEARCH_CONDITION).setMaxResults(1000L).execute();
 			if (response.getResultSizeEstimate() == 0 || response.size() == 1) { // api
 																					// bug?
 				logger.info("no mail for processing");
