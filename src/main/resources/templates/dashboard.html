@@ -8,6 +8,7 @@
         <style type="text/css">
             html, body, #map-canvas {
                 height: 100%;
+                width: 100%;
                 margin: 0px;
                 padding: 0px
             }
@@ -39,17 +40,19 @@
                 {{> common/left_navbar}}
 
                 <!-- content -->
-                <div class="col-md-10">
+                <div class="col-md-12">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="page-header">
-                                <h1>Visited Portals</h1>
+                                <h3>Visited Portals</h3>
                             </div>
-            <div class="row">
-                <div id="map-canvas" style="margin: 0px; padding: 0px"></div>
-                <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
-                <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
-            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="map" class="col-lg-12" style="with:100%; height:500px">
+                            <div id="map-canvas"></div>
+                            <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
+                            <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
                         </div>
                     </div>
                 </div>
@@ -68,24 +71,20 @@
 
             google.maps.event.addDomListener(window, 'load', function() {
                 // 現在位置初期化
-                /*
                 if (navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(
                         function(pos){
                             initialize(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
                     });
                 } else {
-                	*/
                     initialize(35.681382,139.766084, 5);
-                	/*
                 }
-                */
             });
             // Map初期化
             function initialize(lat, lng, tolerance) {
                 var map = document.getElementById("map-canvas");
-            	map.style.width = (window.innerWidth - 150) + "px";
-            	map.style.height = window.innerHeight + "px";
+            	//map.style.width = (window.innerWidth - 150) + "px";
+            	//map.style.height = window.innerHeight + "px";
 
                 var currentPos = new google.maps.LatLng(lat, lng);
                 var options = {
@@ -95,7 +94,7 @@
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
                 mapObj = new google.maps.Map(map, options);
-                currentCenterLatLng = mapObj.getCenter();
+                //currentCenterLatLng = mapObj.getCenter();
                 var marker = new google.maps.Marker({
                     position: currentPos,
                     map: mapObj
@@ -188,8 +187,8 @@
                                 map: mapObj,
                                 title: portal.title,
                                 icon: new google.maps.MarkerImage(
-                                      "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral_icon.png",
-                                      new google.maps.Size(60,60), // size
+                                      "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral.png",
+                                      new google.maps.Size(50,50), // size
                                       new google.maps.Point(0,0),  // origin
                                       new google.maps.Point(30,30) // anchor
                                     )
