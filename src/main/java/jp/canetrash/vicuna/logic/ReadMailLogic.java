@@ -12,7 +12,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import jp.canetrash.vicuna.dao.DamagePortalDao;
-import jp.canetrash.vicuna.dao.DamageReportMailDao;
+import jp.canetrash.vicuna.dao.DamageReportMailDaoImpl;
 import jp.canetrash.vicuna.entity.DamagePortalEntity;
 import jp.canetrash.vicuna.entity.DamageReportMailEntity;
 import jp.canetrash.vicuna.parser.DamageReportMail;
@@ -39,7 +39,7 @@ public class ReadMailLogic {
 	protected Log logger = LogFactory.getLog(ReadMailLogic.class);
 
 	@Autowired
-	private DamageReportMailDao damageReportMailDao;
+	private DamageReportMailDaoImpl damageReportMailDao;
 
 	@Autowired
 	private DamagePortalDao damagePortalDao;

@@ -15,4 +15,12 @@ CREATE TABLE IF NOT EXISTS damage_portal (
   create_date datetime,
   PRIMARY KEY(message_id, seq)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS message_id_uniq_idx ON damage_report_mail (message_id ASC);
+CREATE TABLE IF NOT EXISTS portal (
+  id varchar(255) NOT NULL,
+  portal_name varchar(255),
+  latitude float,
+  longitude float,
+  portal_intel_url varchar(255),
+  create_date datetime,
+  PRIMARY KEY(id)
+);

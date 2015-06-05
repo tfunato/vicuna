@@ -12,9 +12,6 @@ public class DamagePortalEntity implements Serializable {
 	/** serialVersionUID */
 	private static final long serialVersionUID = 6742715802503773598L;
 
-	public DamagePortalEntity() {
-	}
-
 	private String messageId;
 
 	private Integer seq;
@@ -85,4 +82,35 @@ public class DamagePortalEntity implements Serializable {
 		this.createDate = createDate;
 	}
 
+	public DamagePortalKey getPrimaryKey() {
+		return new DamagePortalKey(messageId, seq);
+	}
+
+	public class DamagePortalKey implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		private String messageId;
+		private Integer seq;
+
+		public DamagePortalKey(String messageId, Integer seq) {
+			this.messageId = messageId;
+			this.seq = seq;
+		}
+
+		public String getMessageId() {
+			return messageId;
+		}
+
+		public void setMessageId(String messageId) {
+			this.messageId = messageId;
+		}
+
+		public Integer getSeq() {
+			return seq;
+		}
+
+		public void setSeq(Integer seq) {
+			this.seq = seq;
+		}
+	}
 }
