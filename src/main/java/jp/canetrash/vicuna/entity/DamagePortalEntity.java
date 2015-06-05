@@ -16,13 +16,7 @@ public class DamagePortalEntity implements Serializable {
 
 	private Integer seq;
 
-	private String portalName;
-
-	private String portalIntelUrl;
-
-	private Float longitude;
-
-	private Float latitude;
+	private String portalId;
 
 	private Date createDate;
 
@@ -42,36 +36,12 @@ public class DamagePortalEntity implements Serializable {
 		this.seq = seq;
 	}
 
-	public String getPortalName() {
-		return portalName;
+	public String getPortalId() {
+		return portalId;
 	}
 
-	public void setPortalName(String portalName) {
-		this.portalName = portalName;
-	}
-
-	public String getPortalIntelUrl() {
-		return portalIntelUrl;
-	}
-
-	public void setPortalIntelUrl(String portalIntelUrl) {
-		this.portalIntelUrl = portalIntelUrl;
-	}
-
-	public Float getLongitude() {
-		return longitude;
-	}
-
-	public void setLongitude(Float longitude) {
-		this.longitude = longitude;
-	}
-
-	public Float getLatitude() {
-		return latitude;
-	}
-
-	public void setLatitude(Float latitude) {
-		this.latitude = latitude;
+	public void setPortalId(String portalId) {
+		this.portalId = portalId;
 	}
 
 	public Date getCreateDate() {
@@ -113,4 +83,5 @@ public class DamagePortalEntity implements Serializable {
 			this.seq = seq;
 		}
 	}
+
 }

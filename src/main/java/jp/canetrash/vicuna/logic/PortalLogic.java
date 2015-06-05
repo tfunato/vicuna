@@ -3,10 +3,10 @@ package jp.canetrash.vicuna.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.canetrash.vicuna.dao.DamagePortalDao;
+import jp.canetrash.vicuna.dao.PortalDao;
 import jp.canetrash.vicuna.dto.PortalDto;
 import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
-import jp.canetrash.vicuna.entity.DamagePortalEntity;
+import jp.canetrash.vicuna.entity.PortalEntity;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +19,7 @@ public class PortalLogic {
 	private static Log logger = LogFactory.getLog(PortalLogic.class);
 
 	@Autowired
-	private DamagePortalDao damagePortalDao;
+	private PortalDao portalDao;
 
 	/**
 	 * @param condition
@@ -31,12 +31,12 @@ public class PortalLogic {
 		logger.info("neLng:" + condition.getNeLng());
 		logger.info("swLng:" + condition.getSwLng());
 		logger.info("query start...");
-		List<DamagePortalEntity> searchResult = damagePortalDao
-				.findByGeoRange(condition);
+		List<PortalEntity> searchResult = portalDao
+				.findByLatLngRange(condition);
 		logger.info("query end...");
 		logger.info("mapping start...");
 		List<PortalDto> result = new ArrayList<>();
-		for (DamagePortalEntity entity : searchResult) {
+		for (PortalEntity entity : searchResult) {
 			PortalDto portal = new PortalDto();
 			portal.setTitle(entity.getPortalName());
 			portal.setIntel(entity.getPortalIntelUrl());

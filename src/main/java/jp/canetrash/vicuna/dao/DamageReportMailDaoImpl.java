@@ -5,8 +5,8 @@ import java.util.Date;
 import jp.canetrash.vicuna.entity.DamageReportMailEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,20 +20,19 @@ public class DamageReportMailDaoImpl extends
 		DamageReportMailDao {
 
 	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	/**
 	 * @param gmailId
 	 * @return
 	 */
+	@Override
 	public boolean exists(String gmailId) {
-		Integer count = this.jdbcTemplate
+		Integer count = this.namedParameterJdbcTemplate
 				.queryForObject(
-						"select count(gmail_id) from damage_report_mail where gmail_id = ?",
-						new Object[] { gmailId }, Integer.class);
+						"select count(gmail_id) from damage_report_mail where gmail_id = :gmailId",
+						new MapSqlParameterSource("gmailId", gmailId),
+						Integer.class);
 		return count != 0 ? true : false;
 	}
 
@@ -41,6 +40,7 @@ public class DamageReportMailDaoImpl extends
 	 * @param mailEntity
 	 * @return
 	 */
+	@Override
 	public DamageReportMailEntity save(DamageReportMailEntity mailEntity) {
 
 		mailEntity.setCreateDate(new Date());

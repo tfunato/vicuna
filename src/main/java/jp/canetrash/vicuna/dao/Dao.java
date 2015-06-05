@@ -1,6 +1,7 @@
 package jp.canetrash.vicuna.dao;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * JPA Like interface
@@ -14,7 +15,7 @@ public interface Dao<T, ID extends Serializable> {
 
 	T findOne(ID primaryKey);
 
-	Iterable<T> findAll();
+	List<T> findAll();
 
 	Long count();
 

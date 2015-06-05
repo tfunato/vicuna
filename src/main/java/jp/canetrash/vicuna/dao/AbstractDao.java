@@ -1,6 +1,7 @@
 package jp.canetrash.vicuna.dao;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Dao base
@@ -25,7 +26,7 @@ public abstract class AbstractDao<T, ID extends Serializable> implements
 	}
 
 	@Override
-	public Iterable<T> findAll() {
+	public List<T> findAll() {
 		throw new UnsupportedOperationException("not implemented yet.");
 
 	}

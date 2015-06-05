@@ -13,8 +13,10 @@ import javax.mail.internet.MimeMessage;
 
 import jp.canetrash.vicuna.dao.DamagePortalDao;
 import jp.canetrash.vicuna.dao.DamageReportMailDaoImpl;
+import jp.canetrash.vicuna.dao.PortalDao;
 import jp.canetrash.vicuna.entity.DamagePortalEntity;
 import jp.canetrash.vicuna.entity.DamageReportMailEntity;
+import jp.canetrash.vicuna.entity.PortalEntity;
 import jp.canetrash.vicuna.parser.DamageReportMail;
 import jp.canetrash.vicuna.parser.MailParser;
 import jp.canetrash.vicuna.parser.Portal;
@@ -43,6 +45,9 @@ public class ReadMailLogic {
 
 	@Autowired
 	private DamagePortalDao damagePortalDao;
+
+	@Autowired
+	private PortalDao portalDao;
 
 	@Autowired
 	private MailParser jsoupMailParser;
@@ -118,15 +123,23 @@ public class ReadMailLogic {
 
 		int seq = 0;
 		for (Portal portal : mail.getPortals()) {
-			DamagePortalEntity portalEntity = new DamagePortalEntity();
-			portalEntity.setMessageId(mail.getMessageId());
-			portalEntity.setSeq(seq++);
-			portalEntity.setPortalName(portal.getPortalName());
-			portalEntity.setPortalIntelUrl(portal.getPortalIntelUrl());
-			portalEntity.setLongitude(Float.parseFloat(portal.getLongitude()));
-			portalEntity.setLatitude(Float.parseFloat(portal.getLatitude()));
-			portalEntity.setCreateDate(new Date());
-			this.damagePortalDao.save(portalEntity);
+			Float lat = Float.parseFloat(portal.getLatitude());
+			Float lng = Float.parseFloat(portal.getLongitude());
+
+			PortalEntity portalEntity = this.portalDao.findByLatLng(lat, lng);
+			if (portalEntity == null) {
+				portalEntity = new PortalEntity();
+				portalEntity.setPortalName(portal.getPortalName());
+				portalEntity.setPortalIntelUrl(portal.getPortalIntelUrl());
+				portalEntity.setLongitude(lng);
+				portalEntity.setLatitude(lat);
+				portalEntity = this.portalDao.save(portalEntity);
+			}
+			DamagePortalEntity damagePortalEntity = new DamagePortalEntity();
+			damagePortalEntity.setMessageId(mail.getMessageId());
+			damagePortalEntity.setSeq(seq++);
+			damagePortalEntity.setPortalId(portalEntity.getId());
+			this.damagePortalDao.save(damagePortalEntity);
 		}
 	}
 }
