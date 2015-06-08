@@ -9,6 +9,7 @@ import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
 import jp.canetrash.vicuna.entity.PortalEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -24,6 +25,9 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	@Value("${visited.portal.search.result.size}")
+	private String resultSize;
 
 	@Override
 	public PortalEntity save(PortalEntity entity) {
@@ -74,9 +78,9 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		Assert.notNull(condition.getNeLng());
 		Assert.notNull(condition.getSwLng());
 
-		String sql = "select * " + " from portal p where p.latitude <= :neLat"
+		String sql = "select * from portal p where p.latitude <= :neLat"
 				+ " and p.latitude >= :swLat and p.longitude <= :neLng"
-				+ " and p.longitude >= :swLng limit 2000";
+				+ " and p.longitude >= :swLng limit " + resultSize;
 
 		List<PortalEntity> result = namedParameterJdbcTemplate.query(sql,
 				new BeanPropertySqlParameterSource(condition),
