@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashbord | Vicuna</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {{> common/style}}
+        <style type="text/css">
+            html, body, #map-canvas {
+                height: 100%;
+                width: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+            .img_snap {
+              background: no-repeat url(https://www.ingress.com/img/common_sprite.png) 0 -40px;
+              height: 40px;
+              margin: 0 auto;
+              width: 40px;
+            }
+            .control {
+              padding-right: 5px;
+            }
+            .geo-ctl {
+              padding: 5px;
+            }
+        </style>
+    </head>
+    <body class="bootstrap-admin-with-small-navbar">
+        <!-- small navbar -->
+        {{> common/small_navbar}}
+
+        <!-- main / large navbar -->
+        {{> common/main_navbar}}
+
+        <div class="container">
+            <!-- left, vertical navbar & content -->
+            <div class="row">
+                <!-- left, vertical navbar -->
+                {{> common/left_navbar}}
+
+                <!-- content -->
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="page-header">
+                                <h3>Visited Portals</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="map" class="col-lg-12" style="with:100%; height:500px">
+                            <div id="map-canvas"></div>
+                            <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
+                            <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- footer -->
+        {{> common/footer}}
+        {{> common/script}}
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=geometry,visualization" type="text/javascript" charset="UTF-8"></script>
+        <script type="text/javascript">
+            var mapObj;
+            var currentCenterLatLng;
+            var geocoder;
+            marker_list = new google.maps.MVCArray();
+
+            google.maps.event.addDomListener(window, 'load', function() {
+                // 現在位置初期化
+                if (navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos){
+                            initialize(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                    });
+                } else {
+                    initialize(35.681382,139.766084, 5);
+                }
+            });
+            // Map初期化
+            function initialize(lat, lng, tolerance) {
+                var map = document.getElementById("map-canvas");
+            	//map.style.width = (window.innerWidth - 150) + "px";
+            	//map.style.height = window.innerHeight + "px";
+
+                var currentPos = new google.maps.LatLng(lat, lng);
+                var options = {
+                    zoom: 17,
+                    center: currentPos,
+                    scaleControl: true,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                mapObj = new google.maps.Map(map, options);
+                //currentCenterLatLng = mapObj.getCenter();
+                var marker = new google.maps.Marker({
+                    position: currentPos,
+                    map: mapObj
+                });
+                // ジオコーダー
+                geocoder = new google.maps.Geocoder();
+    /*
+                // 誤差円
+                new google.maps.Circle({
+                    map: mapObj,
+                    center: currentPos,
+                    radius: tolerance, // 単位はメートル
+                    strokeColor: '#0088ff',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 1,
+                    fillColor: '#0088ff',
+                    fillOpacity: 0.2
+                });
+    */
+                // 現在地ボタン
+                var snapControl = document.getElementById('control');
+                snapControl.index = 1;
+                mapObj.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(snapControl);
+                google.maps.event.addDomListener(snapControl, 'click', function() {
+                    moveToCurrent();
+                });
+                // ジオコーディング
+                var address = document.getElementById('address');
+                google.maps.event.addDomListener(address, 'click', function() {
+                    address.value = '';
+                });
+                var geoControl = document.getElementById('geo-contorol');
+                geoControl.index = 2;
+                mapObj.controls[google.maps.ControlPosition.TOP_CENTER].push(geoControl);
+                google.maps.event.addDomListener(document.getElementById('move-btn'), 'click', function() {
+                    var address = document.getElementById('address').value;
+                    if (address) {
+                        geocoder.geocode( { 'address': address}, function(results, status) {
+                            if (status == google.maps.GeocoderStatus.OK) {
+                                mapObj.setCenter(results[0].geometry.location);
+                            } else {
+                                alert('Geocode was not successful for the following reason: ' + status);
+                            }
+                        });
+                    }
+                });
+
+                // 地図移動を検知
+                google.maps.event.addListener(mapObj, 'idle', function(){
+                    // 境界値取得
+                    var bounds = mapObj.getBounds();
+                    movedCenerLatLng = bounds.getCenter();
+                    if (currentCenterLatLng) {
+                        var distance = google.maps.geometry.spherical.computeDistanceBetween(currentCenterLatLng, movedCenerLatLng);
+                        // 200m以上移動したら問い合わせ
+                        if (distance < 200) {
+                            return;
+                        } else {
+                            currentCenterLatLng = movedCenerLatLng;
+                        }
+                    } else {
+                        currentCenterLatLng = movedCenerLatLng;
+                    }
+                    var param = {
+                         neLat: bounds.getNorthEast().lat() + 0.0006,
+                         swLat: bounds.getSouthWest().lat() - 0.0006,
+                         neLng: bounds.getNorthEast().lng() + 0.0006,
+                         swLng: bounds.getSouthWest().lng() - 0.0006
+                    };
+                    // マーカークリア
+                    marker_list.forEach(function(marker, idx) {
+                      marker.setMap(null);
+                    });
+                    //var marker_points = new google.maps.MVCArray();
+
+                    // ポータル問い合わせ
+                    $.ajax({
+                    	type:"POST", 
+                    	url:'/portals', 
+                    	data:param, 
+                        success: function(response) {
+                            // ヒートマップポイントクリア
+                            // marker_points.clear();
+                            // process response
+                            var portals = response;
+                            for (var i= 0; i < portals.length; i++) {
+                              var portal = portals[i];
+                              var  marker = new google.maps.Marker({
+                                position: new google.maps.LatLng(portal.lat, portal.lng),
+                                map: mapObj,
+                                title: portal.title,
+                                icon: new google.maps.MarkerImage(
+                                      "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral.png",
+                                      new google.maps.Size(50,50), // size
+                                      new google.maps.Point(0,0),  // origin
+                                      new google.maps.Point(30,30) // anchor
+                                    )
+                              });
+                              marker_list.push(marker);
+                              //marker_points.push(new google.maps.LatLng(portal.lat, portal.lng));
+
+                              var infoContents = '<div class="infowindow">' +
+                                   '<a href="' + portal.intel + '" target="_blank">' +
+                                   portal.title + '</a></div>';
+                              markerClick(marker, infoContents);
+                            }
+                        }
+                      });
+                      // ヒートマップ
+                      /*
+                      var heatmap = new google.maps.visualization.HeatmapLayer({
+                          radius:40,
+                          opacity:0.3,
+                          data: marker_points
+                      });
+                      heatmap.setMap(mapObj);
+                      */
+                  });
+              }
+              // 現在地へ移動
+              function moveToCurrent() {
+                  if (navigator.geolocation){
+                      navigator.geolocation.getCurrentPosition(function(pos){
+                          mapObj.panTo(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+                      });
+                  }
+              }
+              // マーカークリック
+              function markerClick(marker, msg) {
+                  var infoWindow = new google.maps.InfoWindow({
+                      content: msg,
+                      maxWidth: 250
+                  });
+                  google.maps.event.addListener(marker, 'click', function(event) {
+                      if (infoWindow.getMap()) {
+                          infoWindow.close(marker.getMap(), marker);
+                      } else {
+                          infoWindow.open(marker.getMap(), marker);
+                      }
+                  });
+              }
+         </script>
+    </body>
+</html>

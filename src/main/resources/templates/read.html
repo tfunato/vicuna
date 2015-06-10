@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Read | Vicuna</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {{> common/style}}
+        <link rel="stylesheet" media="screen" href="vendors/jGrowl/jquery.jgrowl.css">
+    </head>
+    <body class="bootstrap-admin-with-small-navbar">
+        <!-- small navbar -->
+        {{> common/small_navbar}}
+
+        <!-- main / large navbar -->
+        {{> common/main_navbar}}
+
+        <div class="container">
+            <!-- left, vertical navbar & content -->
+            <div class="row">
+                <!-- left, vertical navbar -->
+                {{> common/left_navbar}}
+
+                <!-- content -->
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="page-header">
+                                <h1>Read & Parse Damage Mail</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-default  bootstrap-admin-no-table-panel">
+                                <div class="panel-heading">
+                                    <div class="text-muted bootstrap-admin-box-title">Read Gmail</div>
+                                </div>
+                                <div class="bootstrap-admin-panel-content bootstrap-admin-no-table-panel-content collapse in" style="padding: 10px 0; text-align: center">
+                                    <div id="connect-container">
+                                        <div>
+                                            <div class="easyPieChart" data-percent="0" style="width: 110px; height: 110px; line-height: 110px;"><span class="percent">0</span>%</div>
+                                            <div class="chart-bottom-heading"><span id="totalCount" class="label label-info" style="display: none">Total:</span></div>
+                                        </div>
+                                        <div>
+                                            <button id="start" class="btn btn-primary">Start</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- footer -->
+        {{> common/footer}}
+        {{> common/script}}
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+        <script type="text/javascript" src="/vendors/jGrowl/jquery.jgrowl.js"></script>
+<script type="text/javascript">
+
+    var stompClient = null; 
+
+    $(function() {
+        var socket = new SockJS("/readGmail");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/start', function(res){
+		        $('#totalCount').fadeIn();
+		        $('#totalCount').text("Now Preparing...");
+            });
+            stompClient.subscribe('/topic/status', function(res){
+            	var json = JSON.parse(res.body);
+                if (json.status == 'STOPED') {
+                    clearTimeout(timerID);	
+		            $.jGrowl("The operation completed successfully");
+	                $('.easyPieChart').data('easyPieChart').update(100);
+	                $('.percent').text(100);
+			        $('#totalCount').text("Total:" + json.totalCount);
+                } else if (json.status == 'PREPARING') {
+                } else if (json.status == 'RUNNING') {
+                    var newValue = 0;
+                    if (json.processCount != 0) {
+                        newValue = Math.round(json.processCount / json.totalCount * 100);
+                    }
+	                $('.easyPieChart').data('easyPieChart').update(newValue);
+	                $('.percent').text(newValue);
+			        $('#totalCount').text("Total:" + json.totalCount);
+                } else if (json.status == 'ERROR') {
+                    clearTimeout(timerID);	
+		            $.jGrowl("The operation completed with ERROR!");
+                }
+            });
+        });
+        
+        // Easy pie charts
+        $('.easyPieChart').easyPieChart({
+            animate: 1000,
+            barColor: function(percent) {
+                percent /= 100;
+                return "rgb(" + Math.round(255 * (1-percent)) + ", " + Math.round(255 * percent) + ", 0)";
+            },
+            size: 200,
+            lineWidth: 20,
+            trackWidth: 15 
+        });
+
+        $('#start').on('click', function(e) {
+            timerID = setInterval(status, 3000); 
+            $('#totalCount').hide();
+            stompClient.send("/app/read/start", {}, {});
+            $('.easyPieChart').data('easyPieChart').update(0);
+            $('.percent').text(0);
+        });
+    });
+    
+    var timerID;
+    function status() {
+        if (stompClient != null) {
+            stompClient.send("/app/read/status", {}, {});
+        } else {
+            alert('WebSocket connection not established, please connect.');
+        }
+    }
+
+</script>
+    </body>
+</html>
