@@ -67,6 +67,7 @@
             var mapObj;
             var currentCenterLatLng;
             var geocoder;
+            var currentMarker;
             marker_list = new google.maps.MVCArray();
 
             google.maps.event.addDomListener(window, 'load', function() {
@@ -95,7 +96,7 @@
                 };
                 mapObj = new google.maps.Map(map, options);
                 //currentCenterLatLng = mapObj.getCenter();
-                var marker = new google.maps.Marker({
+                currentMarker = new google.maps.Marker({
                     position: currentPos,
                     map: mapObj
                 });
@@ -218,7 +219,13 @@
               function moveToCurrent() {
                   if (navigator.geolocation){
                       navigator.geolocation.getCurrentPosition(function(pos){
-                          mapObj.panTo(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
+                    	  latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                          mapObj.panTo(latLng);
+	                      currentMarker.setMap(null);
+	                      currentMarker = new google.maps.Marker({
+	                          position: latLng,
+	                          map: mapObj
+	                      });
                       });
                   }
               }
