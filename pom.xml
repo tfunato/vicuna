@@ -4,7 +4,7 @@
 
 	<groupId>jp.canetrash.vicuna</groupId>
 	<artifactId>vicuna</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
