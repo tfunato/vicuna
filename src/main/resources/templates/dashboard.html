@@ -73,9 +73,12 @@
                 // 現在位置初期化
                 if (navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(
-                        function(pos){
+                        function(pos) {
                             initialize(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                    });
+                    	},
+                    	function(error) {
+                    		initialize(35.681382,139.766084, 5);
+                    	});
                 } else {
                     initialize(35.681382,139.766084, 5);
                 }
@@ -217,15 +220,19 @@
               // 現在地へ移動
               function moveToCurrent() {
                   if (navigator.geolocation){
-                      navigator.geolocation.getCurrentPosition(function(pos){
-                    	  latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-                          mapObj.panTo(latLng);
-	                      currentMarker.setMap(null);
-	                      currentMarker = new google.maps.Marker({
-	                          position: latLng,
-	                          map: mapObj
-	                      });
-                      });
+                      navigator.geolocation.getCurrentPosition(
+                        function(pos){
+                           latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                           mapObj.panTo(latLng);
+                           currentMarker.setMap(null);
+                           currentMarker = new google.maps.Marker({
+                             position: latLng,
+                             map: mapObj
+	                   },
+	                   function(error) {
+	                	   
+	                   });
+                    });
                   }
               }
               // マーカークリック
