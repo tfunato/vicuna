@@ -27,6 +27,7 @@ public class GmailReader {
 			damageReportMailLogic.processParseMailWithAsync(status);
 		} else {
 			logger.info("can't start.:" + status.getStatus());
+			status.setStatus(Status.STOPED);
 		}
 		return status;
 	}
