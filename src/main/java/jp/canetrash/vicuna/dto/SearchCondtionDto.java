@@ -1,8 +1,8 @@
 package jp.canetrash.vicuna.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tfunato
@@ -16,8 +16,10 @@ public class SearchCondtionDto implements Serializable {
 	private Integer length;
 	private Integer draw;
 
-	private List<SearchDto> search = new ArrayList<>();
-	private List<OrderDto> order = new ArrayList<>();
+	/*
+	private List<Map<String, String>> columns;
+	private List<Map<String, String>> order;
+	*/
 
 	public Integer getStart() {
 		return start;
@@ -43,24 +45,22 @@ public class SearchCondtionDto implements Serializable {
 		this.draw = draw;
 	}
 
-	public List<SearchDto> getSearch() {
-		return search;
+	/*
+	public List<Map<String, String>> getColumns() {
+		return columns;
 	}
 
-	public void setSearch(List<SearchDto> search) {
-		this.search = search;
+	public void setColumns(List<Map<String, String>> columns) {
+		this.columns = columns;
 	}
 
-	public List<OrderDto> getOrder() {
+	public List<Map<String, String>> getOrder() {
 		return order;
 	}
 
-	public void setOrder(List<OrderDto> order) {
+	public void setOrder(List<Map<String, String>> order) {
 		this.order = order;
 	}
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+	*/
 
 }

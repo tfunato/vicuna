@@ -152,6 +152,6 @@ $(document).ready(function() {
 	$('#list').dataTable( {
 		  "processing": true,
 	        "serverSide": true,
-	        "ajax": "/list/search"
+	        "ajax": "/datalist/search"
 	} );
 } );
