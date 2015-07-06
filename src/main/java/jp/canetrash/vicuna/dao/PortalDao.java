@@ -2,7 +2,9 @@ package jp.canetrash.vicuna.dao;
 
 import java.util.List;
 
+import jp.canetrash.vicuna.dto.DataListDto;
 import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
+import jp.canetrash.vicuna.dto.SearchCondtionDto;
 import jp.canetrash.vicuna.entity.PortalEntity;
 
 /**
@@ -23,4 +25,10 @@ public interface PortalDao extends Dao<PortalEntity, String> {
 	 * @return
 	 */
 	List<PortalEntity> findByLatLngRange(PortalSearchConditionDto condition);
+
+	/**
+	 * @param condition
+	 * @return
+	 */
+	DataListDto findByCondition(SearchCondtionDto condition);
 }

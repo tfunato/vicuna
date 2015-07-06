@@ -2,12 +2,19 @@ package jp.canetrash.vicuna.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import jp.canetrash.vicuna.dto.DataListDto;
 import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
+import jp.canetrash.vicuna.dto.SearchCondtionDto;
 import jp.canetrash.vicuna.entity.PortalEntity;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -22,6 +29,8 @@ import org.springframework.util.DigestUtils;
 @Component
 public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		PortalDao {
+
+	private static Log logger = LogFactory.getLog(PortalDaoImpl.class);
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -100,6 +109,83 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 
 				});
 		return result;
+	}
+
+	@Override
+	public DataListDto findByCondition(SearchCondtionDto condition) {
+		StringBuilder sql = new StringBuilder(
+				" from portal p, damage_portal dp, damage_report_mail drm"
+						+ " where p.id = dp.portal_id"
+						+ " and dp.message_id = drm.message_id");
+		// search condition
+		MapSqlParameterSource paramSource = new MapSqlParameterSource();
+		if (condition.getSearch() != null && !condition.getSearch().isEmpty()
+				&& condition.getSearch().get("value") != null
+				&& condition.getSearch().get("value").length() != 0) {
+
+			String searchValue = condition.getSearch().get("value");
+			paramSource.addValue("searchValue", "%" + searchValue + "%");
+			sql.append(" and (");
+			sql.append(" drm.opposite_agent_name like :searchValue or p.portal_name like :searchValue ");
+			sql.append(" ) ");
+		}
+		// order by
+		StringBuilder orderByPart = new StringBuilder().append(" order by ");
+		if (condition.getOrder() != null && condition.getOrder().size() == 0) {
+			for (Map<String, String> orders : condition.getOrder()) {
+				for (Entry<String, String> order : orders.entrySet()) {
+					if (order.getKey().equals("column")) {
+						if (order.getValue().equals("0")) {
+							orderByPart.append("drm.opposite_agent_name");
+						} else if (order.getValue().equals("1")) {
+							orderByPart.append("p.portal_name");
+						} else if (order.getValue().equals("2")) {
+							orderByPart.append("drm.attack_date");
+						}
+					}
+					if (order.getKey().equals("dir")) {
+						orderByPart.append(" " + order.getValue());
+					}
+					// TODO multi order
+				}
+			}
+		} else {
+			orderByPart.append("drm.attack_date desc");
+		}
+		// paging
+		orderByPart.append(" limit " + condition.getLength());
+		orderByPart.append(" offset "
+				+ (condition.getLength() * condition.getStart()));
+
+		String retrievePart = "select drm.opposite_agent_name as opp_ag_name,  p.portal_name as portal_name, p.portal_intel_url as intel_url, drm.attack_date as attack_date ";
+		String countPart = "select count(drm.opposite_agent_name) ";
+
+		DataListDto dataListDto = new DataListDto();
+		// count
+		Integer recordsTotal = namedParameterJdbcTemplate.queryForObject(
+				countPart.toString() + sql.toString(), paramSource,
+				Integer.class);
+		logger.info("TotalCount:" + recordsTotal);
+		dataListDto.setRecordsTotal(recordsTotal);
+
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		List<String[]> dataList = namedParameterJdbcTemplate.query(
+				retrievePart.toString() + sql.toString()
+						+ orderByPart.toString(), paramSource,
+				new RowMapper<String[]>() {
+					public String[] mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						String[] data = new String[3];
+						data[0] = rs.getString("opp_ag_name");
+						data[1] = rs.getString("portal_name");
+						data[2] = sdf.format(rs.getDate("attack_date"));
+						return data;
+					}
+				});
+		dataListDto.setRecordsFiltered(dataList.size());
+		dataListDto.setData(dataList);
+		dataListDto.setDrow(condition.getDraw());
+		return dataListDto;
 	}
 
 }

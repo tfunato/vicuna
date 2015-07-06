@@ -12,14 +12,11 @@ public class SearchCondtionDto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private Map<String, String> search;
+	private List<Map<String, String>> order;
 	private Integer start;
 	private Integer length;
 	private Integer draw;
-
-	/*
-	private List<Map<String, String>> columns;
-	private List<Map<String, String>> order;
-	*/
 
 	public Integer getStart() {
 		return start;
@@ -45,13 +42,12 @@ public class SearchCondtionDto implements Serializable {
 		this.draw = draw;
 	}
 
-	/*
-	public List<Map<String, String>> getColumns() {
-		return columns;
+	public Map<String, String> getSearch() {
+		return search;
 	}
 
-	public void setColumns(List<Map<String, String>> columns) {
-		this.columns = columns;
+	public void setSearch(Map<String, String> search) {
+		this.search = search;
 	}
 
 	public List<Map<String, String>> getOrder() {
@@ -61,6 +57,5 @@ public class SearchCondtionDto implements Serializable {
 	public void setOrder(List<Map<String, String>> order) {
 		this.order = order;
 	}
-	*/
 
 }
