@@ -158,7 +158,7 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 				+ (condition.getLength() * condition.getStart()));
 
 		String retrievePart = "select drm.opposite_agent_name as opp_ag_name,  p.portal_name as portal_name, p.portal_intel_url as intel_url, drm.attack_date as attack_date ";
-		String countPart = "select count(drm.opposite_agent_name) ";
+		String countPart = "select count(*) ";
 
 		DataListDto dataListDto = new DataListDto();
 		// count
