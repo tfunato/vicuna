@@ -131,7 +131,7 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		}
 		// order by
 		StringBuilder orderByPart = new StringBuilder().append(" order by ");
-		if (condition.getOrder() != null && condition.getOrder().size() == 0) {
+		if (condition.getOrder() != null && condition.getOrder().size() != 0) {
 			for (Map<String, String> orders : condition.getOrder()) {
 				for (Entry<String, String> order : orders.entrySet()) {
 					if (order.getKey().equals("column")) {
@@ -154,8 +154,7 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		}
 		// paging
 		orderByPart.append(" limit " + condition.getLength());
-		orderByPart.append(" offset "
-				+ (condition.getLength() * condition.getStart()));
+		orderByPart.append(" offset " + condition.getStart());
 
 		String retrievePart = "select drm.opposite_agent_name as opp_ag_name,  p.portal_name as portal_name, p.portal_intel_url as intel_url, drm.attack_date as attack_date ";
 		String countPart = "select count(*) ";
@@ -167,6 +166,7 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 				Integer.class);
 		logger.info("TotalCount:" + recordsTotal);
 		dataListDto.setRecordsTotal(recordsTotal);
+		dataListDto.setRecordsFiltered(recordsTotal);
 
 		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		List<String[]> dataList = namedParameterJdbcTemplate.query(
@@ -182,7 +182,6 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 						return data;
 					}
 				});
-		dataListDto.setRecordsFiltered(dataList.size());
 		dataListDto.setData(dataList);
 		dataListDto.setDrow(condition.getDraw());
 		return dataListDto;
