@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>List | Vicuna</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {{> common/style}}
+
+    </head>
+    <body class="bootstrap-admin-with-small-navbar">
+        <!-- small navbar -->
+        {{> common/small_navbar}}
+
+        <!-- main / large navbar -->
+        {{> common/main_navbar}}
+
+        <div class="container">
+            <!-- left, vertical navbar & content -->
+            <div class="row">
+                <!-- left, vertical navbar -->
+                {{> common/left_navbar}}
+
+                <!-- content -->
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <div class="text-muted bootstrap-admin-box-title">Damage Report List</div>
+                                </div>
+                                <div class="bootstrap-admin-panel-content">
+                                    <table class="table table-striped table-bordered" id="list">
+                                        <thead>
+                                            <tr>
+                                                <th>OPP AG Name</th>
+                                                <th>PortalName</th>
+                                                <th>Attack Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th>OPP AG Name</th>
+                                                <th>PortalName</th>
+                                                <th>Attack Date</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- footer -->
+        {{> common/footer}}
+        {{> common/script}}
+
+        <script type="text/javascript" src="vendors/datatables/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="js/datalist_bootstrap.js"></script>
+    </body>
+</html>

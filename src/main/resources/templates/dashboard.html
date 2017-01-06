@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         {{> common/style}}
         <style type="text/css">
-            html, body, #map-canvas {
+            #map-canvas {
                 height: 100%;
                 width: 100%;
                 margin: 0px;
@@ -20,6 +20,7 @@
             }
             .control {
               padding-right: 5px;
+              cursor: pointer;
             }
             .geo-ctl {
               padding: 5px;
@@ -43,16 +44,13 @@
                 <div class="col-md-12">
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="page-header">
-                                <h3>Visited Portals</h3>
-                            </div>
+                            <div class="page-header">Visited Portals</div>
                         </div>
                     </div>
                     <div class="row">
-                        <div id="map" class="col-lg-12" style="with:100%; height:500px">
+                        <div id="map" class="col-md-12" style="with:100%; height:450px">
                             <div id="map-canvas"></div>
                             <div id="control" class="control"><div id="snap" class="img_snap"></div></div>
-                            <div id="geo-contorol" class="geo-ctl"><input type="text" id="address"/><input type="button" id="move-btn" value="Move"></div>
                         </div>
                     </div>
                 </div>
@@ -62,31 +60,19 @@
         <!-- footer -->
         {{> common/footer}}
         {{> common/script}}
-        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=geometry,visualization" type="text/javascript" charset="UTF-8"></script>
         <script type="text/javascript">
             var mapObj;
             var currentCenterLatLng;
-            var geocoder;
-            marker_list = new google.maps.MVCArray();
+            var currentMarker;
+            var markerList;
 
-            google.maps.event.addDomListener(window, 'load', function() {
-                // 現在位置初期化
-                if (navigator.geolocation){
-                    navigator.geolocation.getCurrentPosition(
-                        function(pos){
-                            initialize(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                    });
-                } else {
-                    initialize(35.681382,139.766084, 5);
-                }
-            });
             // Map初期化
-            function initialize(lat, lng, tolerance) {
-                var map = document.getElementById("map-canvas");
-            	//map.style.width = (window.innerWidth - 150) + "px";
-            	//map.style.height = window.innerHeight + "px";
+            function initialize() {
+                markerList = new google.maps.MVCArray();
 
-                var currentPos = new google.maps.LatLng(lat, lng);
+                var map = document.getElementById("map-canvas");
+
+                var currentPos = getCurrentLatLng();
                 var options = {
                     zoom: 17,
                     center: currentPos,
@@ -94,52 +80,16 @@
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
                 mapObj = new google.maps.Map(map, options);
-                //currentCenterLatLng = mapObj.getCenter();
-                var marker = new google.maps.Marker({
+                currentMarker = new google.maps.Marker({
                     position: currentPos,
                     map: mapObj
                 });
-                // ジオコーダー
-                geocoder = new google.maps.Geocoder();
-    /*
-                // 誤差円
-                new google.maps.Circle({
-                    map: mapObj,
-                    center: currentPos,
-                    radius: tolerance, // 単位はメートル
-                    strokeColor: '#0088ff',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 1,
-                    fillColor: '#0088ff',
-                    fillOpacity: 0.2
-                });
-    */
                 // 現在地ボタン
                 var snapControl = document.getElementById('control');
                 snapControl.index = 1;
                 mapObj.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(snapControl);
                 google.maps.event.addDomListener(snapControl, 'click', function() {
                     moveToCurrent();
-                });
-                // ジオコーディング
-                var address = document.getElementById('address');
-                google.maps.event.addDomListener(address, 'click', function() {
-                    address.value = '';
-                });
-                var geoControl = document.getElementById('geo-contorol');
-                geoControl.index = 2;
-                mapObj.controls[google.maps.ControlPosition.TOP_CENTER].push(geoControl);
-                google.maps.event.addDomListener(document.getElementById('move-btn'), 'click', function() {
-                    var address = document.getElementById('address').value;
-                    if (address) {
-                        geocoder.geocode( { 'address': address}, function(results, status) {
-                            if (status == google.maps.GeocoderStatus.OK) {
-                                mapObj.setCenter(results[0].geometry.location);
-                            } else {
-                                alert('Geocode was not successful for the following reason: ' + status);
-                            }
-                        });
-                    }
                 });
 
                 // 地図移動を検知
@@ -165,7 +115,7 @@
                          swLng: bounds.getSouthWest().lng() - 0.0006
                     };
                     // マーカークリア
-                    marker_list.forEach(function(marker, idx) {
+                    markerList.forEach(function(marker, idx) {
                       marker.setMap(null);
                     });
                     //var marker_points = new google.maps.MVCArray();
@@ -176,9 +126,6 @@
                     	url:'/portals', 
                     	data:param, 
                         success: function(response) {
-                            // ヒートマップポイントクリア
-                            // marker_points.clear();
-                            // process response
                             var portals = response;
                             for (var i= 0; i < portals.length; i++) {
                               var portal = portals[i];
@@ -193,8 +140,7 @@
                                       new google.maps.Point(30,30) // anchor
                                     )
                               });
-                              marker_list.push(marker);
-                              //marker_points.push(new google.maps.LatLng(portal.lat, portal.lng));
+                              markerList.push(marker);
 
                               var infoContents = '<div class="infowindow">' +
                                    '<a href="' + portal.intel + '" target="_blank">' +
@@ -203,23 +149,39 @@
                             }
                         }
                       });
-                      // ヒートマップ
-                      /*
-                      var heatmap = new google.maps.visualization.HeatmapLayer({
-                          radius:40,
-                          opacity:0.3,
-                          data: marker_points
-                      });
-                      heatmap.setMap(mapObj);
-                      */
                   });
               }
+              // 現在地を取得
+              function getCurrentLatLng() {
+                // 現在位置初期化
+                var lat = 35.681382;
+                var lng = 139.766084;
+                if (navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            lat = pos.coords.latitude;
+                            lng = pos.coords.longitude;
+                    	},
+                    	function(error) {});
+                }
+                return new google.maps.LatLng(lat, lng);
+              } 
               // 現在地へ移動
               function moveToCurrent() {
                   if (navigator.geolocation){
-                      navigator.geolocation.getCurrentPosition(function(pos){
-                          mapObj.panTo(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
-                      });
+                      navigator.geolocation.getCurrentPosition(
+                        function(pos){
+                           latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                           mapObj.panTo(latLng);
+                           currentMarker.setMap(null);
+                           currentMarker = new google.maps.Marker({
+                             position: latLng,
+                             map: mapObj
+	                   },
+	                   function(error) {
+	                	   
+	                   });
+                    });
                   }
               }
               // マーカークリック
@@ -237,5 +199,6 @@
                   });
               }
          </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkKL2HpfaabNFMvGLIb7eEbEt1SvM3nDw&libraries=geometry&callback=initialize" async defer></script>
     </body>
 </html>

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.canetrash.vicuna.dao.PortalDao;
+import jp.canetrash.vicuna.dto.DataListDto;
 import jp.canetrash.vicuna.dto.PortalDto;
 import jp.canetrash.vicuna.dto.PortalSearchConditionDto;
+import jp.canetrash.vicuna.dto.SearchCondtionDto;
 import jp.canetrash.vicuna.entity.PortalEntity;
 
 import org.apache.commons.logging.Log;
@@ -22,6 +24,8 @@ public class PortalLogic {
 	private PortalDao portalDao;
 
 	/**
+	 * portal search
+	 * 
 	 * @param condition
 	 * @return
 	 */
@@ -46,5 +50,16 @@ public class PortalLogic {
 		}
 		logger.info("mapping end...");
 		return result;
+	}
+
+	/**
+	 * report search
+	 * 
+	 * @param condition
+	 * @return
+	 */
+	public DataListDto searchReport(SearchCondtionDto condition) {
+
+		return portalDao.findByCondition(condition);
 	}
 }
