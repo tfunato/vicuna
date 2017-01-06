@@ -208,7 +208,7 @@ table > tbody > tr > td.actions .btn{
     padding: 3px 8px;
 }
 .bootstrap-admin-navbar-under-small{
-    top: 25px;
+    top: 0px;
     z-index: 1020;
 }
 .bootstrap-admin-navbar .navbar-nav > li > a:focus,
@@ -390,11 +390,11 @@ table > tbody > tr > td.actions .btn{
 /** Footer **/
 .navbar-footer{
     background-color: #F8F8F8;
-    margin-top: 15px;
+    margin-top: 0px;
 }
 .navbar-footer footer p{
-    margin-bottom: 15px;
-    margin-top: 15px;
+    margin-bottom: 0px;
+    margin-top: 0px;
 }
 
 
