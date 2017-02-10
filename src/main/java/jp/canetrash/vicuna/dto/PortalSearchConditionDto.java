@@ -10,6 +10,7 @@ public class PortalSearchConditionDto {
 	private String swLat;
 	private String neLng;
 	private String swLng;
+    private String agentName;
 
 	public String getNeLat() {
 		return neLat;
@@ -43,4 +44,11 @@ public class PortalSearchConditionDto {
 		this.swLng = swLng;
 	}
 
+    public String getAgentName() {
+        return this.agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 }

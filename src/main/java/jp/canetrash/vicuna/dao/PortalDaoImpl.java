@@ -111,6 +111,30 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		return result;
 	}
 
+	public List<PortalEntity> findByOppositeAgentName(PortalSearchConditionDto condition) {
+		Assert.notNull(condition.getAgentName());
+        String sql = "select p.id, p.portal_name, p.latitude, p.longitude"
+                + " from portal p, damage_portal dp, damage_report_mail drm"
+                + " where dp.message_id = drm.message_id"
+                + " and dp.portal_id = p.id"
+                + " and drm.opposite_agent_name like '%:agentName%'"
+                + " group by p.latitude, p.longitude";
+		List<PortalEntity> result = namedParameterJdbcTemplate.query(sql,
+				new BeanPropertySqlParameterSource(condition),
+				new RowMapper<PortalEntity>() {
+					public PortalEntity mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+						PortalEntity entity = new PortalEntity();
+						entity.setId(rs.getString("id"));
+						entity.setPortalName(rs.getString("portal_name"));
+						entity.setLatitude(rs.getFloat("latitude"));
+						entity.setLongitude(rs.getFloat("longitude"));
+						return entity;
+					}
+				});
+		return result;
+    }
+
 	@Override
 	public DataListDto findByCondition(SearchCondtionDto condition) {
 		StringBuilder sql = new StringBuilder(
@@ -186,5 +210,4 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
 		dataListDto.setDrow(condition.getDraw());
 		return dataListDto;
 	}
-
 }

@@ -30,5 +30,11 @@ public interface PortalDao extends Dao<PortalEntity, String> {
 	 * @param condition
 	 * @return
 	 */
+	List<PortalEntity> findByOppositeAgentName(PortalSearchConditionDto condition);
+
+	/**
+	 * @param condition
+	 * @return
+	 */
 	DataListDto findByCondition(SearchCondtionDto condition);
 }
