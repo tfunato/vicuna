@@ -117,7 +117,7 @@ public class PortalDaoImpl extends AbstractDao<PortalEntity, String> implements
                 + " from portal p, damage_portal dp, damage_report_mail drm"
                 + " where dp.message_id = drm.message_id"
                 + " and dp.portal_id = p.id"
-                + " and drm.opposite_agent_name like '%:agentName%'"
+                + " and drm.opposite_agent_name = :agentName"
                 + " group by p.latitude, p.longitude";
 		List<PortalEntity> result = namedParameterJdbcTemplate.query(sql,
 				new BeanPropertySqlParameterSource(condition),

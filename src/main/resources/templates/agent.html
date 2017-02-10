@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Agent | Vicuna</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {{> common/style}}
+        <style type="text/css">
+            #map-canvas {
+                height: 100%;
+                width: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+            .control {
+              padding-right: 5px;
+              cursor: pointer;
+            }
+            .geo-ctl {
+              padding: 5px;
+            }
+        </style>
+    </head>
+    <body >
+        <div class="container">
+            <div class="row">
+                <!-- content -->
+                <div class="col-md-12">
+                    <div class="row">
+                        <div id="map" class="col-md-12" style="width:100%; height:580px">
+                            <div id="map-canvas"></div>
+                            <div id="agent" class="geo-ctl"><input type="text" id="agent_name"/><input type="button" id="search-btn" value="search"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- footer -->
+        {{> common/script}}
+        <script type="text/javascript">
+            var mapObj;
+            var currentMarker;
+            var markerList;
+
+            // Map初期化
+            function initialize() {
+                markerList = new google.maps.MVCArray();
+
+                var map = document.getElementById("map-canvas");
+
+                var currentPos = getCurrentLatLng();
+                var options = {
+                    zoom: 17,
+                    center: currentPos,
+                    scaleControl: true,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    clickableIcons: false
+                };
+                mapObj = new google.maps.Map(map, options);
+                // 検索ボタン
+                var searchControl = document.getElementById('agent');
+                mapObj.controls[google.maps.ControlPosition.TOP_CENTER].push(searchControl);
+                var searchButton = document.getElementById('search-btn');
+                google.maps.event.addDomListener(searchButton, 'click', function() {
+                    searchAgent();
+                });
+              }
+
+              // 現在地を取得
+              function getCurrentLatLng() {
+                // 現在位置初期化
+                var lat = 35.681382;
+                var lng = 139.766084;
+                return new google.maps.LatLng(lat, lng);
+              }
+
+              // 検索
+              function searchAgent() {
+                // マーカークリア
+                markerList.forEach(function(marker, idx) {
+                  marker.setMap(null);
+                });
+                var bounds = new google.maps.LatLngBounds();
+                $.ajax({
+                    type:"POST", 
+                    url:'/attp', 
+                    data: "agentName=" + $('#agent_name').val(), 
+                    success: function(response) {
+                        var portals = response;
+                        for (var i= 0; i < portals.length; i++) {
+                          var portal = portals[i];
+                          var  marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(portal.lat, portal.lng),
+                            map: mapObj,
+                            title: portal.title,
+                            icon: new google.maps.MarkerImage(
+                                  "https://commondatastorage.googleapis.com/ingress.com/img/map_icons/marker_images/neutral.png",
+                                  new google.maps.Size(50,50), // size
+                                  new google.maps.Point(0,0),  // origin
+                                  new google.maps.Point(30,30) // anchor
+                                )
+                          });
+
+                          var infoContents = '<div class="infowindow">' +
+                               '<a href="' + portal.intel + '" target="_blank">' +
+                               portal.title + '</a></div>';
+                          markerClick(marker, infoContents);
+
+                          bounds.extend (marker.position);
+                          markerList.push(marker);
+                        }
+                        mapObj.fitBounds (bounds);
+                    }
+                  });
+              }
+              // マーカークリック
+              function markerClick(marker, msg) {
+                  var infoWindow = new google.maps.InfoWindow({
+                      content: msg,
+                      maxWidth: 250
+                  });
+                  google.maps.event.addListener(marker, 'click', function(event) {
+                      if (infoWindow.getMap()) {
+                          infoWindow.close(marker.getMap(), marker);
+                      } else {
+                          infoWindow.open(marker.getMap(), marker);
+                      }
+                  });
+              }
+         </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkKL2HpfaabNFMvGLIb7eEbEt1SvM3nDw&libraries=geometry&callback=initialize" async defer></script>
+    </body>
+</html>

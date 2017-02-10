@@ -53,6 +53,33 @@ public class PortalLogic {
 	}
 
 	/**
+	 * portal search
+	 * 
+	 * @param condition
+	 * @return
+	 */
+	public List<PortalDto> searchPortalsByAgentName(PortalSearchConditionDto condition) {
+		logger.info("agentName:" + condition.getAgentName());
+		logger.info("query start...");
+		List<PortalEntity> searchResult = portalDao
+				.findByOppositeAgentName(condition);
+		logger.info("query end...");
+		logger.info("mapping start...");
+		logger.info("result...:" + searchResult.size());
+		List<PortalDto> result = new ArrayList<>();
+		for (PortalEntity entity : searchResult) {
+			PortalDto portal = new PortalDto();
+			portal.setTitle(entity.getPortalName());
+			portal.setLat(entity.getLatitude());
+			portal.setLng(entity.getLongitude());
+            portal.setPortalId(entity.getId());
+			result.add(portal);
+		}
+		logger.info("mapping end...");
+		return result;
+	}
+
+	/**
 	 * report search
 	 * 
 	 * @param condition

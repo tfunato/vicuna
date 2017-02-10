@@ -16,6 +16,8 @@ public class PortalDto {
 	/** intel map url */
 	private String intel;
 
+    private String portalId;
+
 	public String getTitle() {
 		return title;
 	}
@@ -46,5 +48,13 @@ public class PortalDto {
 
 	public void setIntel(String intel) {
 		this.intel = intel;
+	}
+
+	public String getPortalId() {
+		return portalId;
+	}
+
+	public void setPortalId(String portalId) {
+		this.portalId = portalId;
 	}
 }

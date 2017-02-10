@@ -23,4 +23,10 @@ public class Portals {
 
 		return portalLogic.searchPortals(condition);
 	}
+
+	@RequestMapping("/attp")
+	public @ResponseBody List<PortalDto> attackedPortals(
+			PortalSearchConditionDto condition) {
+		return portalLogic.searchPortalsByAgentName(condition);
+	}
 }
